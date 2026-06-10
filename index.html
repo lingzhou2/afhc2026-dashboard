@@ -56,7 +56,6 @@
   .card.active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,183,205,.25); }
   .card-break { background: #FAFCF8; border-style: dashed; opacity: .7; }
   .card-break:hover { opacity: 1; }
-  .card-edited { border-left: 3px solid var(--accent); }
   .card-title { font-size: 14px; font-weight: 600; color: var(--dark); margin-bottom: 6px; line-height: 1.35; }
   .card-time { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
   .card-venue { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
@@ -437,7 +436,6 @@ var PROGRAMME_DATA = {
     var card = document.createElement('div');
     var cls = 'card';
     if (ev.session_type === 'break') cls += ' card-break';
-    if (hasEdits(baseEv.event_id)) cls += ' card-edited';
     card.className = cls;
     card.dataset.eventId = baseEv.event_id;
     card.dataset.sessionType = ev.session_type;
