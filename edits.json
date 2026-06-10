@@ -3,5 +3,15 @@
     "venue": "Western Sydney Western SydneyWestern Sydney",
     "subtheme": "Western Sydney",
     "notes": "Western Sydney"
+  },
+  "d2-plenary-2": {
+    "agenda": [
+      {
+        "time": "sssss",
+        "speaker": "sss",
+        "topic": "sss",
+        "description": "sss"
+      }
+    ]
   }
 }
