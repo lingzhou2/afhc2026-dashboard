@@ -87,7 +87,6 @@
   .detail-source { background: #F8FAF6; border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; font-size: 13px; color: var(--muted); white-space: pre-wrap; line-height: 1.6; }
   .detail-source-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 6px; }
 
-  /* Agenda items in view mode */
   .agenda-list { list-style: none; padding: 0; }
   .agenda-item { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
   .agenda-item:last-child { border-bottom: none; }
@@ -96,7 +95,6 @@
   .agenda-item-speaker { font-size: 13px; color: var(--muted); }
   .agenda-item-desc { font-size: 13px; color: var(--body-text); margin-top: 4px; }
 
-  /* Admin edit form */
   .edit-form { display: none; }
   .admin-mode .edit-form { display: block; }
   .admin-mode .view-content { display: none; }
@@ -118,6 +116,7 @@
 
   .btn-save { background: var(--accent); color: #fff; padding: 10px 24px; font-size: 14px; width: 100%; margin-top: 10px; border-radius: 8px; }
   .btn-save:hover { background: #009DB0; }
+  .btn-save:disabled { background: #ccc; cursor: not-allowed; }
   .btn-add-agenda { background: #E8F5E9; color: #2E7D32; padding: 8px 16px; font-size: 12px; border-radius: 6px; border: 1px dashed #A5D6A7; width: 100%; }
   .btn-add-agenda:hover { background: #C8E6C9; }
   .btn-reset { background: #FFF3E0; color: #E65100; padding: 8px 16px; font-size: 12px; border-radius: 6px; border: 1px solid #FFCC80; width: 100%; margin-top: 6px; }
@@ -125,6 +124,19 @@
 
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 13px; font-weight: 600; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; }
   .toast.show { opacity: 1; }
+
+  .token-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 300; background: rgba(25,42,58,.4); justify-content: center; align-items: center; }
+  .token-modal.open { display: flex; }
+  .token-box { background: #fff; border-radius: 12px; padding: 28px 32px; max-width: 460px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,.15); }
+  .token-box h3 { font-size: 16px; color: var(--dark); margin-bottom: 8px; }
+  .token-box p { font-size: 13px; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+  .token-box input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: monospace; margin-bottom: 14px; outline: none; }
+  .token-box input:focus { border-color: var(--accent); }
+  .token-box .token-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .token-box .btn-token-save { background: var(--accent); color: #fff; padding: 8px 20px; }
+  .token-box .btn-token-cancel { background: #f0f0f0; color: var(--body-text); padding: 8px 20px; }
+
+  .loading-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--accent); z-index: 999; transition: width .3s; }
 
   @media (max-width: 900px) {
     .board { flex-direction: column; }
@@ -134,6 +146,8 @@
 </style>
 </head>
 <body>
+
+<div class="loading-bar" id="loadingBar" style="width:0"></div>
 
 <header class="header">
   <h1>AFHC 2026 Internal Programme Dashboard</h1>
@@ -147,7 +161,7 @@
 </header>
 
 <div class="filter-bar">
-  <input type="text" id="searchBox" placeholder="Search activities…">
+  <input type="text" id="searchBox" placeholder="Search activities...">
   <select id="filterDay"><option value="">All Days</option></select>
   <select id="filterType"><option value="">All Types</option></select>
   <select id="filterVenue"><option value="">All Venues</option></select>
@@ -162,9 +176,27 @@
   <div class="detail-panel" id="detailPanel"></div>
 </div>
 
+<div class="token-modal" id="tokenModal">
+  <div class="token-box">
+    <h3>GitHub Token</h3>
+    <p>Enter a GitHub Personal Access Token with <strong>repo</strong> scope to enable saving.<br>
+    Generate one at: Settings &rarr; Developer settings &rarr; Personal access tokens &rarr; Fine-grained tokens<br>
+    Select repo: <code>afhc2026-dashboard</code>, permission: <strong>Contents: Read and write</strong></p>
+    <input type="password" id="tokenInput" placeholder="github_pat_...">
+    <div class="token-actions">
+      <button class="btn btn-token-cancel" id="tokenCancel">Cancel</button>
+      <button class="btn btn-token-save" id="tokenSave">Save Token</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
+var GITHUB_OWNER = 'lingzhou2';
+var GITHUB_REPO = 'afhc2026-dashboard';
+var GITHUB_FILE = 'edits.json';
+
 var PROGRAMME_DATA = {
   source_version: "Program_v3",
   source_date: "May 2026",
@@ -176,9 +208,9 @@ var PROGRAMME_DATA = {
     { id: "post_conference", label: "Post-conference" }
   ],
   events: [
-    {event_id:"pre-site-visit-greenway",source_version:"Program_v3",day_group:"pre_conference",day_label:"Pre-conference MON",title:"Site Visit 1: GreenWay",start_time:null,end_time:null,time_label:"AM–PM (time TBD)",venue:"GreenWay",lead:"Susan Thompson",subtheme:null,session_type:"visit",access_type:"open",summary:"Site visit to GreenWay",notes:null,source_page:1,source_text:"Site Visits (2-3)\n1. GreenWay (Lead: Susan Thompson)",display_order:1},
-    {event_id:"pre-site-visit-waterloo",source_version:"Program_v3",day_group:"pre_conference",day_label:"Pre-conference MON",title:"Site Visit 2: Waterloo & Sydney LHD",start_time:null,end_time:null,time_label:"AM–PM (time TBD)",venue:"Waterloo & Sydney LHD",lead:"Fiona Haigh",subtheme:null,session_type:"visit",access_type:"open",summary:"Site visit to Waterloo & Sydney LHD",notes:null,source_page:1,source_text:"Site Visits (2-3)\n2. Waterloo & Sydney LHD (Lead: Fiona Haigh)",display_order:2},
-    {event_id:"pre-site-visit-unsw",source_version:"Program_v3",day_group:"pre_conference",day_label:"Pre-conference MON",title:"Site Visit 3: UNSW-based Tour",start_time:null,end_time:null,time_label:"AM–PM (time TBD)",venue:"UNSW",lead:"TBD",subtheme:null,session_type:"visit",access_type:"open",summary:"UNSW-based tour, lead TBD",notes:"Lead TBD",source_page:1,source_text:"Site Visits (2-3)\n3. UNSW-based tour (Lead: TBD)",display_order:3},
+    {event_id:"pre-site-visit-greenway",source_version:"Program_v3",day_group:"pre_conference",day_label:"Pre-conference MON",title:"Site Visit 1: GreenWay",start_time:null,end_time:null,time_label:"AM-PM (time TBD)",venue:"GreenWay",lead:"Susan Thompson",subtheme:null,session_type:"visit",access_type:"open",summary:"Site visit to GreenWay",notes:null,source_page:1,source_text:"Site Visits (2-3)\n1. GreenWay (Lead: Susan Thompson)",display_order:1},
+    {event_id:"pre-site-visit-waterloo",source_version:"Program_v3",day_group:"pre_conference",day_label:"Pre-conference MON",title:"Site Visit 2: Waterloo & Sydney LHD",start_time:null,end_time:null,time_label:"AM-PM (time TBD)",venue:"Waterloo & Sydney LHD",lead:"Fiona Haigh",subtheme:null,session_type:"visit",access_type:"open",summary:"Site visit to Waterloo & Sydney LHD",notes:null,source_page:1,source_text:"Site Visits (2-3)\n2. Waterloo & Sydney LHD (Lead: Fiona Haigh)",display_order:2},
+    {event_id:"pre-site-visit-unsw",source_version:"Program_v3",day_group:"pre_conference",day_label:"Pre-conference MON",title:"Site Visit 3: UNSW-based Tour",start_time:null,end_time:null,time_label:"AM-PM (time TBD)",venue:"UNSW",lead:"TBD",subtheme:null,session_type:"visit",access_type:"open",summary:"UNSW-based tour, lead TBD",notes:"Lead TBD",source_page:1,source_text:"Site Visits (2-3)\n3. UNSW-based tour (Lead: TBD)",display_order:3},
     {event_id:"pre-healthy-cities-relaunch",source_version:"Program_v3",day_group:"pre_conference",day_label:"Pre-conference MON",title:"Australian Healthy Cities Event - Re-launch",start_time:null,end_time:null,time_label:"PM",venue:"Clancy Auditorium",lead:"Kelly Andrews",subtheme:null,session_type:"meeting",access_type:"open",summary:"Australian Healthy Cities re-launch event",notes:null,source_page:1,source_text:"(PM)\nAustralian Healthy Cities Event - Re-launch\nClancy Auditorium\nKelly Andrews",display_order:4},
     {event_id:"pre-welcome-reception",source_version:"Program_v3",day_group:"pre_conference",day_label:"Pre-conference MON",title:"Welcome Reception & Exhibition",start_time:"17:00",end_time:"19:00",time_label:"17:00-19:00",venue:"UNSW Precincts / Health Translation Hub",lead:null,subtheme:null,session_type:"reception",access_type:"open",summary:"Theme of exhibition: First Nations place and health",notes:"Theme of exhibition: First Nations place and health",source_page:1,source_text:"17:00-19:00\nWelcome Reception & Exhibition\nTheme of exhibition: First Nations place and health\nHealth Translation Hub\nUNSW Precincts",display_order:5},
     {event_id:"d1-exhibition",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Exhibition & Poster Presentation UNSW Showcase",start_time:null,end_time:null,time_label:"All day",venue:null,lead:null,subtheme:null,session_type:"exhibition",access_type:"open",summary:"Runs throughout the day",notes:null,source_page:1,source_text:"Exhibition & Poster Presentation\nUNSW Showcase",display_order:1},
@@ -217,34 +249,119 @@ var PROGRAMME_DATA = {
 };
 
 (function() {
-  var STORAGE_KEY = 'afhc2026_edits';
+  var REPO_API = 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + GITHUB_FILE;
+  var RAW_URL = 'https://raw.githubusercontent.com/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/main/' + GITHUB_FILE;
   var adminMode = false;
-  var edits = loadEdits();
+  var edits = {};
+  var fileSha = null;
 
-  function loadEdits() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; } }
-  function saveEdits() { localStorage.setItem(STORAGE_KEY, JSON.stringify(edits)); }
-  function getEvent(ev) { var e = Object.assign({}, ev); if (edits[ev.event_id]) { Object.assign(e, edits[ev.event_id]); } return e; }
-  function hasEdits(id) { return edits[id] && Object.keys(edits[id]).length > 0; }
+  function getToken() { return localStorage.getItem('afhc_gh_token') || ''; }
+  function setToken(t) { localStorage.setItem('afhc_gh_token', t); }
+
+  function showLoading(pct) { document.getElementById('loadingBar').style.width = pct + '%'; }
+  function hideLoading() { setTimeout(function() { showLoading(0); }, 300); }
 
   function showToast(msg) {
     var t = document.getElementById('toast');
     t.textContent = msg;
     t.classList.add('show');
-    setTimeout(function() { t.classList.remove('show'); }, 2000);
+    setTimeout(function() { t.classList.remove('show'); }, 2500);
   }
+
+  // Load edits from GitHub
+  function loadEditsFromGitHub(callback) {
+    showLoading(30);
+    fetch(RAW_URL + '?t=' + Date.now())
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        edits = data || {};
+        showLoading(100);
+        hideLoading();
+        if (callback) callback();
+      })
+      .catch(function() {
+        edits = {};
+        showLoading(100);
+        hideLoading();
+        if (callback) callback();
+      });
+  }
+
+  // Get file SHA (needed for GitHub API update)
+  function getFileSha(callback) {
+    var token = getToken();
+    fetch(REPO_API, { headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github.v3+json' } })
+      .then(function(r) { return r.json(); })
+      .then(function(data) { fileSha = data.sha; callback(true); })
+      .catch(function() { callback(false); });
+  }
+
+  // Save edits to GitHub
+  function saveEditsToGitHub(callback) {
+    var token = getToken();
+    if (!token) { showTokenModal(); return; }
+    showLoading(30);
+    getFileSha(function(ok) {
+      if (!ok) { showToast('Failed to get file info'); hideLoading(); return; }
+      showLoading(60);
+      var content = btoa(unescape(encodeURIComponent(JSON.stringify(edits, null, 2))));
+      fetch(REPO_API, {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: 'Update programme edits', content: content, sha: fileSha })
+      })
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function(data) {
+        fileSha = data.content.sha;
+        showLoading(100);
+        hideLoading();
+        if (callback) callback(true);
+      })
+      .catch(function(err) {
+        showLoading(100);
+        hideLoading();
+        if (err.message.indexOf('401') > -1 || err.message.indexOf('403') > -1) {
+          showToast('Token invalid or expired. Please update.');
+          showTokenModal();
+        } else {
+          showToast('Save failed: ' + err.message);
+        }
+        if (callback) callback(false);
+      });
+    });
+  }
+
+  // Token modal
+  function showTokenModal() {
+    document.getElementById('tokenInput').value = getToken();
+    document.getElementById('tokenModal').classList.add('open');
+  }
+  document.getElementById('tokenSave').addEventListener('click', function() {
+    var t = document.getElementById('tokenInput').value.trim();
+    if (t) { setToken(t); document.getElementById('tokenModal').classList.remove('open'); showToast('Token saved'); }
+  });
+  document.getElementById('tokenCancel').addEventListener('click', function() {
+    document.getElementById('tokenModal').classList.remove('open');
+  });
+
+  function getEvent(ev) { var e = Object.assign({}, ev); if (edits[ev.event_id]) { Object.assign(e, edits[ev.event_id]); } return e; }
+  function hasEdits(id) { return edits[id] && Object.keys(edits[id]).length > 0; }
 
   var day_groups = PROGRAMME_DATA.day_groups;
   var baseEvents = PROGRAMME_DATA.events;
 
   function formatLabel(s) { return s.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }); }
   function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+  function attr(s) { return (s || '').replace(/"/g, '&quot;'); }
 
   // Filters
   var daySelect = document.getElementById('filterDay');
   var typeSelect = document.getElementById('filterType');
   var venueSelect = document.getElementById('filterVenue');
   var accessSelect = document.getElementById('filterAccess');
-
   day_groups.forEach(function(g) { var o = document.createElement('option'); o.value = g.id; o.textContent = g.label; daySelect.appendChild(o); });
   var sessionTypes = []; baseEvents.forEach(function(e) { if (sessionTypes.indexOf(e.session_type) === -1) sessionTypes.push(e.session_type); }); sessionTypes.sort();
   sessionTypes.forEach(function(t) { var o = document.createElement('option'); o.value = t; o.textContent = formatLabel(t); typeSelect.appendChild(o); });
@@ -253,7 +370,6 @@ var PROGRAMME_DATA = {
   var accessTypes = []; baseEvents.forEach(function(e) { if (accessTypes.indexOf(e.access_type) === -1) accessTypes.push(e.access_type); }); accessTypes.sort();
   accessTypes.forEach(function(a) { var o = document.createElement('option'); o.value = a; o.textContent = formatLabel(a); accessSelect.appendChild(o); });
 
-  // Build board
   var board = document.getElementById('board');
   function buildBoard() {
     board.innerHTML = '';
@@ -283,7 +399,6 @@ var PROGRAMME_DATA = {
     card.dataset.venue = ev.venue || '';
     card.dataset.dayGroup = ev.day_group;
     card.dataset.search = [ev.title, ev.venue, ev.lead, ev.subtheme, ev.notes, ev.summary].filter(Boolean).join(' ').toLowerCase();
-
     var html = '<div class="card-title">' + esc(ev.title) + '</div>';
     if (ev.time_label) html += '<div class="card-time">' + esc(ev.time_label) + '</div>';
     if (ev.venue) html += '<div class="card-venue">' + esc(ev.venue) + '</div>';
@@ -297,7 +412,6 @@ var PROGRAMME_DATA = {
     return card;
   }
 
-  // Filters
   var searchBox = document.getElementById('searchBox');
   var filterSummary = document.getElementById('filterSummary');
   function applyFilters() {
@@ -334,11 +448,10 @@ var PROGRAMME_DATA = {
     document.querySelectorAll('.card.active').forEach(function(c) { c.classList.remove('active'); });
     var ac = document.querySelector('.card[data-event-id="' + baseEv.event_id + '"]');
     if (ac) ac.classList.add('active');
-
     var agenda = ev.agenda || [];
     var html = '<button class="detail-close" id="detailClose">&times;</button>';
 
-    // === VIEW MODE ===
+    // VIEW MODE
     html += '<div class="view-content">';
     html += '<div class="detail-day">' + esc(ev.day_label) + '</div>';
     html += '<div class="detail-title">' + esc(ev.title) + '</div>';
@@ -371,7 +484,7 @@ var PROGRAMME_DATA = {
     html += '<div class="detail-source">' + esc(ev.source_text) + '</div>';
     html += '</div>';
 
-    // === EDIT FORM ===
+    // EDIT FORM
     html += '<div class="edit-form">';
     html += '<div class="detail-day">' + esc(ev.day_label) + ' &mdash; Edit Mode</div>';
     html += '<div class="edit-group"><label>Title</label><input type="text" id="ef-title" value="' + attr(ev.title) + '"></div>';
@@ -385,28 +498,20 @@ var PROGRAMME_DATA = {
     html += '<div class="edit-group"><label>Sub-theme</label><input type="text" id="ef-subtheme" value="' + attr(ev.subtheme) + '"></div>';
     html += '<div class="edit-group"><label>Summary</label><textarea id="ef-summary">' + esc(ev.summary || '') + '</textarea></div>';
     html += '<div class="edit-group"><label>Notes</label><textarea id="ef-notes">' + esc(ev.notes || '') + '</textarea></div>';
-
-    // Agenda editor
     html += '<div class="agenda-edit-section">';
     html += '<div class="agenda-edit-title">Agenda Items</div>';
     html += '<div id="agendaEntries">';
-    agenda.forEach(function(a, i) {
-      html += agendaEntryHTML(a, i);
-    });
+    agenda.forEach(function(a, i) { html += agendaEntryHTML(a, i); });
     html += '</div>';
     html += '<button class="btn btn-add-agenda" id="btnAddAgenda">+ Add Agenda Item</button>';
     html += '</div>';
-
-    html += '<button class="btn btn-save" id="btnSave">Save Changes</button>';
-    if (hasEdits(baseEv.event_id)) {
-      html += '<button class="btn btn-reset" id="btnReset">Reset to Original</button>';
-    }
+    html += '<button class="btn btn-save" id="btnSave">Save to GitHub</button>';
+    if (hasEdits(baseEv.event_id)) html += '<button class="btn btn-reset" id="btnReset">Reset to Original</button>';
     html += '</div>';
 
     panel.innerHTML = html;
     panel.className = 'detail-panel' + (adminMode ? ' admin-mode' : '');
     overlay.classList.add('open');
-
     document.getElementById('detailClose').addEventListener('click', closeDetail);
     if (adminMode) bindEditHandlers(baseEv);
   }
@@ -423,7 +528,6 @@ var PROGRAMME_DATA = {
 
   function bindEditHandlers(baseEv) {
     var agendaIdx = (getEvent(baseEv).agenda || []).length;
-
     document.getElementById('btnAddAgenda').addEventListener('click', function() {
       var container = document.getElementById('agendaEntries');
       var div = document.createElement('div');
@@ -432,12 +536,15 @@ var PROGRAMME_DATA = {
       container.appendChild(entry);
       entry.querySelector('.agenda-entry-remove').addEventListener('click', function() { entry.remove(); });
     });
-
     document.querySelectorAll('.agenda-entry-remove').forEach(function(btn) {
       btn.addEventListener('click', function() { btn.closest('.agenda-entry').remove(); });
     });
 
     document.getElementById('btnSave').addEventListener('click', function() {
+      var saveBtn = document.getElementById('btnSave');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+
       var changes = {};
       var fields = {title:'ef-title',start_time:'ef-start',end_time:'ef-end',time_label:'ef-timelabel',venue:'ef-venue',lead:'ef-lead',subtheme:'ef-subtheme',summary:'ef-summary',notes:'ef-notes'};
       for (var key in fields) {
@@ -445,7 +552,6 @@ var PROGRAMME_DATA = {
         if (val === '') val = null;
         if (val !== (baseEv[key] || null)) changes[key] = val;
       }
-
       var agendaItems = [];
       document.querySelectorAll('.agenda-entry').forEach(function(entry) {
         var item = {
@@ -464,27 +570,38 @@ var PROGRAMME_DATA = {
         if (edits[baseEv.event_id].agenda && edits[baseEv.event_id].agenda.length === 0) delete edits[baseEv.event_id].agenda;
         var empty = true; for (var k in edits[baseEv.event_id]) { if (edits[baseEv.event_id][k] !== baseEv[k]) { empty = false; break; } }
         if (empty) delete edits[baseEv.event_id];
-        saveEdits();
       }
 
-      buildBoard();
-      showToast('Saved: ' + (getEvent(baseEv).title || baseEv.title));
-      openDetail(baseEv);
+      saveEditsToGitHub(function(ok) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save to GitHub';
+        if (ok) {
+          buildBoard();
+          showToast('Saved to GitHub: ' + (getEvent(baseEv).title || baseEv.title));
+          openDetail(baseEv);
+        }
+      });
     });
 
     var resetBtn = document.getElementById('btnReset');
     if (resetBtn) {
       resetBtn.addEventListener('click', function() {
+        resetBtn.disabled = true;
+        resetBtn.textContent = 'Resetting...';
         delete edits[baseEv.event_id];
-        saveEdits();
-        buildBoard();
-        showToast('Reset: ' + baseEv.title);
-        openDetail(baseEv);
+        saveEditsToGitHub(function(ok) {
+          if (ok) {
+            buildBoard();
+            showToast('Reset: ' + baseEv.title);
+            openDetail(baseEv);
+          } else {
+            resetBtn.disabled = false;
+            resetBtn.textContent = 'Reset to Original';
+          }
+        });
       });
     }
   }
-
-  function attr(s) { return (s || '').replace(/"/g, '&quot;'); }
 
   function closeDetail() {
     overlay.classList.remove('open');
@@ -497,6 +614,7 @@ var PROGRAMME_DATA = {
   // Admin toggle
   var btnAdmin = document.getElementById('btnAdmin');
   btnAdmin.addEventListener('click', function() {
+    if (!adminMode && !getToken()) { showTokenModal(); return; }
     adminMode = !adminMode;
     btnAdmin.classList.toggle('active', adminMode);
     btnAdmin.textContent = adminMode ? 'Admin ON' : 'Admin';
@@ -524,16 +642,17 @@ var PROGRAMME_DATA = {
       try {
         var imported = JSON.parse(ev.target.result);
         for (var id in imported) { edits[id] = Object.assign(edits[id] || {}, imported[id]); }
-        saveEdits();
-        buildBoard();
-        showToast('Imported edits for ' + Object.keys(imported).length + ' events');
+        saveEditsToGitHub(function(ok) {
+          if (ok) { buildBoard(); showToast('Imported & saved ' + Object.keys(imported).length + ' events to GitHub'); }
+        });
       } catch(err) { showToast('Import failed: invalid JSON'); }
     };
     reader.readAsText(file);
     e.target.value = '';
   });
 
-  buildBoard();
+  // Init: load from GitHub then build
+  loadEditsFromGitHub(function() { buildBoard(); });
 })();
 </script>
 </body>
