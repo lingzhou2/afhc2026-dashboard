@@ -242,6 +242,21 @@ var PROGRAMME_DATA = {
     return JSON.stringify(a === undefined ? null : a) === JSON.stringify(b === undefined ? null : b);
   }
 
+  function apiHeaders(includeJsonContentType) {
+    var headers = {
+      'Accept': 'application/vnd.github.v3+json'
+    };
+    if (githubToken) headers['Authorization'] = 'Bearer ' + githubToken;
+    if (includeJsonContentType) headers['Content-Type'] = 'application/json';
+    return headers;
+  }
+
+  function decodeGitHubContent(payload) {
+    if (!payload || !payload.content) return {};
+    var normalized = payload.content.replace(/\n/g, '');
+    return JSON.parse(decodeURIComponent(escape(atob(normalized))));
+  }
+
   function getEvent(ev) {
     var merged = Object.assign({}, ev);
     if (edits[ev.event_id]) Object.assign(merged, edits[ev.event_id]);
@@ -249,34 +264,59 @@ var PROGRAMME_DATA = {
   }
   function hasEdits(id) { return edits[id] && Object.keys(edits[id]).length > 0; }
 
-  function loadEditsFromGitHub(callback) {
-    showLoading(30);
+  function loadEditsFromRaw(callback) {
     fetch(RAW_URL + '?t=' + Date.now())
       .then(function(r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
       })
       .then(function(data) {
+        callback(true, data || {});
+      })
+      .catch(function() {
+        callback(false, {});
+      });
+  }
+
+  function loadEditsFromApi(callback) {
+    fetch(REPO_API + '?t=' + Date.now(), {
+      headers: apiHeaders(false)
+    })
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function(data) {
+        callback(true, decodeGitHubContent(data));
+      })
+      .catch(function() {
+        callback(false, {});
+      });
+  }
+
+  function loadEditsFromGitHub(callback) {
+    showLoading(30);
+    loadEditsFromApi(function(ok, data) {
+      if (ok) {
         edits = data || {};
         showLoading(100);
         hideLoading();
         if (callback) callback();
-      })
-      .catch(function() {
-        edits = {};
+        return;
+      }
+      loadEditsFromRaw(function(rawOk, rawData) {
+        edits = rawOk ? (rawData || {}) : {};
         showLoading(100);
         hideLoading();
         if (callback) callback();
       });
+    });
   }
 
   function getFileSha(callback) {
     if (!githubToken) { callback(false); return; }
     fetch(REPO_API, {
-      headers: {
-        'Authorization': 'Bearer ' + githubToken,
-        'Accept': 'application/vnd.github.v3+json'
-      }
+      headers: apiHeaders(false)
     })
       .then(function(r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -307,11 +347,7 @@ var PROGRAMME_DATA = {
       var content = btoa(unescape(encodeURIComponent(JSON.stringify(edits, null, 2))));
       fetch(REPO_API, {
         method: 'PUT',
-        headers: {
-          'Authorization': 'Bearer ' + githubToken,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
-        },
+        headers: apiHeaders(true),
         body: JSON.stringify({
           message: 'Update programme edits',
           content: content,
@@ -347,13 +383,15 @@ var PROGRAMME_DATA = {
   }
 
   function verifyRemoteEdits(callback) {
-    fetch(RAW_URL + '?t=' + Date.now())
-      .then(function(r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
-      })
-      .then(function(data) { callback(true, data || {}); })
-      .catch(function() { callback(false, null); });
+    loadEditsFromApi(function(ok, data) {
+      if (ok) {
+        callback(true, data || {});
+        return;
+      }
+      loadEditsFromRaw(function(rawOk, rawData) {
+        callback(rawOk, rawOk ? (rawData || {}) : null);
+      });
+    });
   }
 
   var day_groups = PROGRAMME_DATA.day_groups;
