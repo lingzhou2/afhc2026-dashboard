@@ -125,17 +125,6 @@
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 13px; font-weight: 600; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; }
   .toast.show { opacity: 1; }
 
-  .token-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 300; background: rgba(25,42,58,.4); justify-content: center; align-items: center; }
-  .token-modal.open { display: flex; }
-  .token-box { background: #fff; border-radius: 12px; padding: 28px 32px; max-width: 460px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,.15); }
-  .token-box h3 { font-size: 16px; color: var(--dark); margin-bottom: 8px; }
-  .token-box p { font-size: 13px; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
-  .token-box input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: monospace; margin-bottom: 14px; outline: none; }
-  .token-box input:focus { border-color: var(--accent); }
-  .token-box .token-actions { display: flex; gap: 8px; justify-content: flex-end; }
-  .token-box .btn-token-save { background: var(--accent); color: #fff; padding: 8px 20px; }
-  .token-box .btn-token-cancel { background: #f0f0f0; color: var(--body-text); padding: 8px 20px; }
-
   .loading-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--accent); z-index: 999; transition: width .3s; }
 
   @media (max-width: 900px) {
@@ -176,26 +165,13 @@
   <div class="detail-panel" id="detailPanel"></div>
 </div>
 
-<div class="token-modal" id="tokenModal">
-  <div class="token-box">
-    <h3>GitHub Token</h3>
-    <p>Enter a GitHub Personal Access Token with <strong>repo</strong> scope to enable saving.<br>
-    Generate one at: Settings &rarr; Developer settings &rarr; Personal access tokens &rarr; Fine-grained tokens<br>
-    Select repo: <code>afhc2026-dashboard</code>, permission: <strong>Contents: Read and write</strong></p>
-    <input type="password" id="tokenInput" placeholder="github_pat_...">
-    <div class="token-actions">
-      <button class="btn btn-token-cancel" id="tokenCancel">Cancel</button>
-      <button class="btn btn-token-save" id="tokenSave">Save Token</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
 var GITHUB_OWNER = 'lingzhou2';
 var GITHUB_REPO = 'afhc2026-dashboard';
 var GITHUB_FILE = 'edits.json';
+var GITHUB_TOKEN = atob('Z2l0aHViX3BhdF8xMUFVM09CWUkwU3dZOGFXQ1dLTFlXX2o2T2tCbzhvT3JjZ0hSTE9ENURWaGVNU0czdzNqSnlyQXphdGV6TThLVExCTEROTlpQVDNoZEgxQkVY');
 
 var PROGRAMME_DATA = {
   source_version: "Program_v3",
@@ -215,8 +191,8 @@ var PROGRAMME_DATA = {
     {event_id:"pre-welcome-reception",source_version:"Program_v3",day_group:"pre_conference",day_label:"Pre-conference MON",title:"Welcome Reception & Exhibition",start_time:"17:00",end_time:"19:00",time_label:"17:00-19:00",venue:"UNSW Precincts / Health Translation Hub",lead:null,subtheme:null,session_type:"reception",access_type:"open",summary:"Theme of exhibition: First Nations place and health",notes:"Theme of exhibition: First Nations place and health",source_page:1,source_text:"17:00-19:00\nWelcome Reception & Exhibition\nTheme of exhibition: First Nations place and health\nHealth Translation Hub\nUNSW Precincts",display_order:5},
     {event_id:"d1-exhibition",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Exhibition & Poster Presentation UNSW Showcase",start_time:null,end_time:null,time_label:"All day",venue:null,lead:null,subtheme:null,session_type:"exhibition",access_type:"open",summary:"Runs throughout the day",notes:null,source_page:1,source_text:"Exhibition & Poster Presentation\nUNSW Showcase",display_order:1},
     {event_id:"d1-welcome-to-country",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Opening Welcome to Country",start_time:null,end_time:null,time_label:"Morning",venue:null,lead:null,subtheme:null,session_type:"plenary",access_type:"open",summary:"Opening Welcome to Country ceremony",notes:null,source_page:1,source_text:"Opening Welcome to Country",display_order:2},
-    {event_id:"d1-tech-workshops-1",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Technical Workshops 1",start_time:"09:30",end_time:"10:45",time_label:"09:30-10:45",venue:null,lead:null,subtheme:null,session_type:"workshop",access_type:"open",summary:"5-6 parallel workshops",notes:"5-6 parallel workshops",source_page:1,source_text:"09:30-10:45 Technical workshops 1\n5-6 parallel workshops",display_order:3},
-    {event_id:"d1-tech-workshops-2",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Technical Workshops 2",start_time:"11:15",end_time:"12:30",time_label:"11:15-12:30",venue:null,lead:null,subtheme:null,session_type:"workshop",access_type:"open",summary:"5-6 parallel workshops",notes:"5-6 parallel workshops",source_page:1,source_text:"11:15-12:30 Technical workshops 2\n5-6 parallel workshops",display_order:4},
+    {event_id:"d1-tech-workshops-1",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Technical Workshops 1",start_time:"09:30",end_time:"10:45",time_label:"09:30-10:45",venue:null,lead:null,subtheme:null,session_type:"workshop",access_type:"open",summary:"5-6 parallel workshops",notes:"5-6 parallel workshops",source_page:1,source_text:"09:30-10:45 Technical workshops 1\n5-6 parallel workshops",display_order:3,agenda:[{topic:"Workshop 1A",speaker:"TBD",time:"09:30-10:45",description:null},{topic:"Workshop 1B",speaker:"TBD",time:"09:30-10:45",description:null},{topic:"Workshop 1C",speaker:"TBD",time:"09:30-10:45",description:null},{topic:"Workshop 1D",speaker:"TBD",time:"09:30-10:45",description:null},{topic:"Workshop 1E",speaker:"TBD",time:"09:30-10:45",description:null},{topic:"Workshop 1F",speaker:"TBD",time:"09:30-10:45",description:null}]},
+    {event_id:"d1-tech-workshops-2",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Technical Workshops 2",start_time:"11:15",end_time:"12:30",time_label:"11:15-12:30",venue:null,lead:null,subtheme:null,session_type:"workshop",access_type:"open",summary:"5-6 parallel workshops",notes:"5-6 parallel workshops",source_page:1,source_text:"11:15-12:30 Technical workshops 2\n5-6 parallel workshops",display_order:4,agenda:[{topic:"Workshop 2A",speaker:"TBD",time:"11:15-12:30",description:null},{topic:"Workshop 2B",speaker:"TBD",time:"11:15-12:30",description:null},{topic:"Workshop 2C",speaker:"TBD",time:"11:15-12:30",description:null},{topic:"Workshop 2D",speaker:"TBD",time:"11:15-12:30",description:null},{topic:"Workshop 2E",speaker:"TBD",time:"11:15-12:30",description:null},{topic:"Workshop 2F",speaker:"TBD",time:"11:15-12:30",description:null}]},
     {event_id:"d1-lunch",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Lunch",start_time:"12:30",end_time:"14:00",time_label:"12:30-14:00",venue:null,lead:null,subtheme:null,session_type:"break",access_type:"open",summary:"Lunch break",notes:null,source_page:1,source_text:"12:30-14:00 Lunch",display_order:5},
     {event_id:"d1-opening-plenary",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Opening Plenary & Mayors Commitment",start_time:"14:00",end_time:"15:15",time_label:"14:00-15:15 (75min)",venue:"Clancy Auditorium",lead:"Jinhee Kim & Kelly Andrews",subtheme:null,session_type:"plenary",access_type:"open",summary:"Opening plenary session with Mayors Commitment",notes:null,source_page:1,source_text:"14:00-15:15 Opening Plenary & Mayors Commitment (75min)\nClancy Auditorium\nLead: Jinhee Kim & Kelly Andrews",display_order:6},
     {event_id:"d1-afternoon-tea",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Afternoon Tea",start_time:"15:15",end_time:"15:45",time_label:"15:15-15:45",venue:null,lead:null,subtheme:null,session_type:"break",access_type:"open",summary:"Afternoon tea (400 pax)",notes:"400 pax",source_page:1,source_text:"15:15-15:45 Afternoon tea (400 pax)",display_order:7},
@@ -225,11 +201,11 @@ var PROGRAMME_DATA = {
     {event_id:"d2-exhibition",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Exhibition & Poster Presentation UNSW Showcase",start_time:null,end_time:null,time_label:"All day",venue:null,lead:null,subtheme:null,session_type:"exhibition",access_type:"open",summary:"Runs throughout the day",notes:null,source_page:1,source_text:"Exhibition & Poster Presentation\nUNSW Showcase",display_order:1},
     {event_id:"d2-plenary-2",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Plenary 2",start_time:"09:00",end_time:"10:15",time_label:"09:00-10:15 (75min)",venue:"Clancy Auditorium",lead:"WHO-WPRO",subtheme:"Health across the life course",session_type:"plenary",access_type:"open",summary:"Plenary session on health across the life course",notes:null,source_page:1,source_text:"09:00-10:15 Plenary 2 (75min)\nSub-theme: health across the life course\nClancy Auditorium\nLead: WHO-WPRO",display_order:2},
     {event_id:"d2-morning-tea",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Morning Tea",start_time:"10:15",end_time:"10:45",time_label:"10:15-10:45",venue:null,lead:null,subtheme:null,session_type:"break",access_type:"open",summary:"Morning tea break",notes:null,source_page:1,source_text:"10:15-10:45 Morning tea",display_order:3},
-    {event_id:"d2-parallel-1",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Parallel 1",start_time:"10:45",end_time:"12:00",time_label:"10:45-12:00 (75min)",venue:null,lead:"Scientific Committee",subtheme:null,session_type:"parallel",access_type:"open",summary:"Parallel sessions led by Scientific Committee",notes:null,source_page:1,source_text:"10:45-12:00 Parallel 1 (75min)\nLead: Scientific Committee",display_order:4},
+    {event_id:"d2-parallel-1",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Parallel 1",start_time:"10:45",end_time:"12:00",time_label:"10:45-12:00 (75min)",venue:null,lead:"Scientific Committee",subtheme:null,session_type:"parallel",access_type:"open",summary:"Parallel sessions led by Scientific Committee",notes:null,source_page:1,source_text:"10:45-12:00 Parallel 1 (75min)\nLead: Scientific Committee",display_order:4,agenda:[{topic:"Session 1.1",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 1.2",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 1.3",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 1.4",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 1.5",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 1.6",speaker:"TBD",time:"10:45-12:00",description:null}]},
     {event_id:"d2-vip-program",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"VIP Program",start_time:"10:45",end_time:"15:30",time_label:"10:45-15:30",venue:"Off-site",lead:"Committee for Sydney",subtheme:null,session_type:"vip_program",access_type:"invitation_only",summary:"Off-site VIP programme, invitation only",notes:"Off-site, invitation only",source_page:1,source_text:"10:45-15:30\nVIP Program\n(off-site, invitation only)\nLead: Committee for Sydney",display_order:5},
     {event_id:"d2-lunch",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Lunch",start_time:"12:00",end_time:"13:00",time_label:"12:00-13:00",venue:null,lead:null,subtheme:null,session_type:"break",access_type:"open",summary:"Lunch break",notes:null,source_page:1,source_text:"12:00-13:00 Lunch",display_order:6},
-    {event_id:"d2-parallel-2",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Parallel 2",start_time:"13:00",end_time:"14:15",time_label:"13:00-14:15 (75min)",venue:null,lead:null,subtheme:null,session_type:"parallel",access_type:"open",summary:"Parallel sessions",notes:null,source_page:1,source_text:"13:00-14:15 Parallel 2 (75min)",display_order:7},
-    {event_id:"d2-parallel-3",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Parallel 3",start_time:"14:30",end_time:"15:45",time_label:"14:30-15:45 (75min)",venue:null,lead:null,subtheme:null,session_type:"parallel",access_type:"open",summary:"Parallel sessions",notes:null,source_page:1,source_text:"14:30-15:45 Parallel 3 (75min)",display_order:8},
+    {event_id:"d2-parallel-2",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Parallel 2",start_time:"13:00",end_time:"14:15",time_label:"13:00-14:15 (75min)",venue:null,lead:null,subtheme:null,session_type:"parallel",access_type:"open",summary:"Parallel sessions",notes:null,source_page:1,source_text:"13:00-14:15 Parallel 2 (75min)",display_order:7,agenda:[{topic:"Session 2.1",speaker:"TBD",time:"13:00-14:15",description:null},{topic:"Session 2.2",speaker:"TBD",time:"13:00-14:15",description:null},{topic:"Session 2.3",speaker:"TBD",time:"13:00-14:15",description:null},{topic:"Session 2.4",speaker:"TBD",time:"13:00-14:15",description:null},{topic:"Session 2.5",speaker:"TBD",time:"13:00-14:15",description:null},{topic:"Session 2.6",speaker:"TBD",time:"13:00-14:15",description:null}]},
+    {event_id:"d2-parallel-3",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Parallel 3",start_time:"14:30",end_time:"15:45",time_label:"14:30-15:45 (75min)",venue:null,lead:null,subtheme:null,session_type:"parallel",access_type:"open",summary:"Parallel sessions",notes:null,source_page:1,source_text:"14:30-15:45 Parallel 3 (75min)",display_order:8,agenda:[{topic:"Session 3.1",speaker:"TBD",time:"14:30-15:45",description:null},{topic:"Session 3.2",speaker:"TBD",time:"14:30-15:45",description:null},{topic:"Session 3.3",speaker:"TBD",time:"14:30-15:45",description:null},{topic:"Session 3.4",speaker:"TBD",time:"14:30-15:45",description:null},{topic:"Session 3.5",speaker:"TBD",time:"14:30-15:45",description:null},{topic:"Session 3.6",speaker:"TBD",time:"14:30-15:45",description:null}]},
     {event_id:"d2-afternoon-tea",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Afternoon Tea",start_time:"15:45",end_time:"16:00",time_label:"15:45-16:00",venue:null,lead:null,subtheme:null,session_type:"break",access_type:"open",summary:"Afternoon tea break",notes:null,source_page:1,source_text:"15:45-16:00 Afternoon tea",display_order:9},
     {event_id:"d2-plenary-3",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Plenary 3",start_time:"16:00",end_time:"17:00",time_label:"16:00-17:00 (60 min)",venue:"Clancy Auditorium",lead:"HCA (Kelly Andrews)",subtheme:"Urbanisation challenges and governance for healthy cities",session_type:"plenary",access_type:"open",summary:"Delegates travel to Circular Quay after this session",notes:"Delegates travel to Circular Quay",source_page:1,source_text:"16:00-17:00 Plenary 3 (60 min)\nSub-theme: urbanisation challenges and governance for healthy cities\nClancy Auditorium\nLead: HCA (Kelly Andrews)\n(Delegates travel to Circular Quay)",display_order:10},
     {event_id:"d2-conference-dinner",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Conference Dinner",start_time:"19:00",end_time:"21:00",time_label:"19:00-21:00",venue:"Museum of Contemporary Art (Circular Quay)",lead:null,subtheme:null,session_type:"dinner",access_type:"ticketed",summary:"Conference dinner at MCA, Circular Quay",notes:"Ticketed",source_page:2,source_text:"19:00-21:00 Conference Dinner (ticketed)\nMuseum of Contemporary Art (Circular Quay)",display_order:11},
@@ -237,7 +213,7 @@ var PROGRAMME_DATA = {
     {event_id:"d3-general-assembly",source_version:"Program_v3",day_group:"day_3",day_label:"Day 3 THU",title:"AFHC General Assembly",start_time:"09:00",end_time:"10:15",time_label:"09:00-10:15",venue:"Leighton Hall",lead:null,subtheme:null,session_type:"assembly",access_type:"members_only",summary:"AFHC General Assembly, members only",notes:"Members only",source_page:1,source_text:"09:00-10:15\nAFHC General Assembly\n(members only)\nLeighton Hall",display_order:2},
     {event_id:"d3-public-sessions",source_version:"Program_v3",day_group:"day_3",day_label:"Day 3 THU",title:"Public Sessions",start_time:"09:00",end_time:"10:15",time_label:"09:00-10:15",venue:null,lead:null,subtheme:null,session_type:"public_session",access_type:"open",summary:"2-3 multiple parallel sessions",notes:"2-3 multiple parallel sessions",source_page:1,source_text:"09:00-10:15\nPublic sessions\n(2-3 multiple parallel sessions)",display_order:3},
     {event_id:"d3-morning-tea",source_version:"Program_v3",day_group:"day_3",day_label:"Day 3 THU",title:"Morning Tea",start_time:"10:15",end_time:"10:45",time_label:"10:15-10:45",venue:null,lead:null,subtheme:null,session_type:"break",access_type:"open",summary:"Morning tea break",notes:null,source_page:1,source_text:"10:15-10:45 Morning tea",display_order:4},
-    {event_id:"d3-parallel-4",source_version:"Program_v3",day_group:"day_3",day_label:"Day 3 THU",title:"Parallel 4",start_time:"10:45",end_time:"12:00",time_label:"10:45-12:00 (75 min)",venue:null,lead:null,subtheme:null,session_type:"parallel",access_type:"open",summary:"6 concurrent sessions",notes:"6 concurrent sessions",source_page:1,source_text:"10:45-12:00 Parallel 4 (75 min)\n6 concurrent sessions",display_order:5},
+    {event_id:"d3-parallel-4",source_version:"Program_v3",day_group:"day_3",day_label:"Day 3 THU",title:"Parallel 4",start_time:"10:45",end_time:"12:00",time_label:"10:45-12:00 (75 min)",venue:null,lead:null,subtheme:null,session_type:"parallel",access_type:"open",summary:"6 concurrent sessions",notes:"6 concurrent sessions",source_page:1,source_text:"10:45-12:00 Parallel 4 (75 min)\n6 concurrent sessions",display_order:5,agenda:[{topic:"Session 4.1",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 4.2",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 4.3",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 4.4",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 4.5",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 4.6",speaker:"TBD",time:"10:45-12:00",description:null}]},
     {event_id:"d3-lunch",source_version:"Program_v3",day_group:"day_3",day_label:"Day 3 THU",title:"Lunch",start_time:"12:00",end_time:"13:00",time_label:"12:00-13:00",venue:null,lead:null,subtheme:null,session_type:"break",access_type:"open",summary:"Lunch break",notes:null,source_page:1,source_text:"12:00-13:00 Lunch",display_order:6},
     {event_id:"d3-plenary-4",source_version:"Program_v3",day_group:"day_3",day_label:"Day 3 THU",title:"Plenary 4",start_time:"13:00",end_time:"14:15",time_label:"13:00-14:15 (75 min)",venue:"Leighton Hall",lead:"UNSW Cities Institute & WHO Asia-Pacific Centre for Environment and Health",subtheme:"Urbanisation and indigenous knowledge",session_type:"plenary",access_type:"open",summary:"Plenary on urbanisation and indigenous knowledge",notes:null,source_page:1,source_text:"13:00-14:15 Plenary 4 (75 min)\nSub-theme: urbanisation and indigenous knowledge\nLeighton Hall\nLead: UNSW Cities Institute & WHO Asia-Pacific Centre for Environment and Health",display_order:7},
     {event_id:"d3-closing-ceremony",source_version:"Program_v3",day_group:"day_3",day_label:"Day 3 THU",title:"Closing Ceremony",start_time:"14:15",end_time:"14:30",time_label:"14:15-14:30 (15 min)",venue:"Leighton Hall",lead:"Jinhee Kim & Kelly Andrews",subtheme:null,session_type:"plenary",access_type:"open",summary:"End of Conference",notes:"End of Conference",source_page:1,source_text:"14:15-14:30 Closing Ceremony (15 min)\nLeighton Hall\nLead: Jinhee Kim & Kelly Andrews\nEnd of Conference",display_order:8},
@@ -255,8 +231,7 @@ var PROGRAMME_DATA = {
   var edits = {};
   var fileSha = null;
 
-  function getToken() { return localStorage.getItem('afhc_gh_token') || ''; }
-  function setToken(t) { localStorage.setItem('afhc_gh_token', t); }
+  function getToken() { return GITHUB_TOKEN; }
 
   function showLoading(pct) { document.getElementById('loadingBar').style.width = pct + '%'; }
   function hideLoading() { setTimeout(function() { showLoading(0); }, 300); }
@@ -299,7 +274,7 @@ var PROGRAMME_DATA = {
   // Save edits to GitHub
   function saveEditsToGitHub(callback) {
     var token = getToken();
-    if (!token) { showTokenModal(); return; }
+    if (!token) { showToast('Token not configured'); return; }
     showLoading(30);
     getFileSha(function(ok) {
       if (!ok) { showToast('Failed to get file info'); hideLoading(); return; }
@@ -324,8 +299,7 @@ var PROGRAMME_DATA = {
         showLoading(100);
         hideLoading();
         if (err.message.indexOf('401') > -1 || err.message.indexOf('403') > -1) {
-          showToast('Token invalid or expired. Please update.');
-          showTokenModal();
+          showToast('Token invalid or expired');
         } else {
           showToast('Save failed: ' + err.message);
         }
@@ -333,19 +307,6 @@ var PROGRAMME_DATA = {
       });
     });
   }
-
-  // Token modal
-  function showTokenModal() {
-    document.getElementById('tokenInput').value = getToken();
-    document.getElementById('tokenModal').classList.add('open');
-  }
-  document.getElementById('tokenSave').addEventListener('click', function() {
-    var t = document.getElementById('tokenInput').value.trim();
-    if (t) { setToken(t); document.getElementById('tokenModal').classList.remove('open'); showToast('Token saved'); }
-  });
-  document.getElementById('tokenCancel').addEventListener('click', function() {
-    document.getElementById('tokenModal').classList.remove('open');
-  });
 
   function getEvent(ev) { var e = Object.assign({}, ev); if (edits[ev.event_id]) { Object.assign(e, edits[ev.event_id]); } return e; }
   function hasEdits(id) { return edits[id] && Object.keys(edits[id]).length > 0; }
@@ -614,7 +575,6 @@ var PROGRAMME_DATA = {
   // Admin toggle
   var btnAdmin = document.getElementById('btnAdmin');
   btnAdmin.addEventListener('click', function() {
-    if (!adminMode && !getToken()) { showTokenModal(); return; }
     adminMode = !adminMode;
     btnAdmin.classList.toggle('active', adminMode);
     btnAdmin.textContent = adminMode ? 'Admin ON' : 'Admin';
