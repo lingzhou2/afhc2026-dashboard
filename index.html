@@ -44,7 +44,10 @@
   .board { display: flex; gap: 0; overflow-x: auto; padding: 24px 24px 32px; min-height: calc(100vh - 140px); }
   .day-column { flex: 1 0 240px; min-width: 240px; max-width: 320px; display: flex; flex-direction: column; }
   .day-column + .day-column { border-left: 1px solid var(--border); padding-left: 12px; margin-left: 12px; }
-  .day-header { font-size: 14px; font-weight: 700; color: var(--dark); padding: 8px 6px 12px; display: flex; align-items: center; gap: 8px; }
+  .day-header { color: var(--dark); padding: 8px 6px 12px; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .day-header-text { display: flex; flex-direction: column; gap: 2px; }
+  .day-date { font-size: 12px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: var(--accent); }
+  .day-title { font-size: 14px; font-weight: 700; }
   .day-count { background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 10px; }
   .cards-list { display: flex; flex-direction: column; gap: 10px; padding-right: 6px; }
 
@@ -84,6 +87,14 @@
   .detail-value { font-size: 14px; color: var(--body-text); line-height: 1.5; }
   .detail-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
   .detail-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+  .detail-subday { font-size: 16px; font-weight: 700; color: var(--dark); margin-bottom: 14px; }
+  .agenda-list { list-style: none; padding: 0; }
+  .agenda-item { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+  .agenda-item:last-child { border-bottom: none; }
+  .agenda-item-time { font-size: 12px; color: var(--accent); font-weight: 600; }
+  .agenda-item-topic { font-size: 14px; color: var(--dark); font-weight: 600; margin: 2px 0; }
+  .agenda-item-speaker { font-size: 13px; color: var(--muted); }
+  .agenda-item-desc { font-size: 13px; color: var(--body-text); margin-top: 4px; }
   .edit-form { display: none; }
   .admin-mode .edit-form { display: block; }
   .admin-mode .view-content { display: none; }
@@ -96,10 +107,16 @@
   .edit-group textarea { resize: vertical; min-height: 60px; }
   .edit-row { display: flex; gap: 10px; }
   .edit-row .edit-group { flex: 1; }
-
+  .agenda-edit-section { margin-top: 20px; padding-top: 16px; border-top: 2px solid var(--accent); }
+  .agenda-edit-title { font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .agenda-entry { background: #F8FAF6; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; position: relative; }
+  .agenda-entry-remove { position: absolute; top: 8px; right: 8px; background: none; border: none; color: #ccc; cursor: pointer; font-size: 16px; line-height: 1; }
+  .agenda-entry-remove:hover { color: #E65100; }
   .btn-save { background: var(--accent); color: #fff; padding: 10px 24px; font-size: 14px; width: 100%; margin-top: 10px; border-radius: 8px; }
   .btn-save:hover { background: #009DB0; }
   .btn-save:disabled { background: #ccc; cursor: not-allowed; }
+  .btn-add-agenda { background: #E8F5E9; color: #2E7D32; padding: 8px 16px; font-size: 12px; border-radius: 6px; border: 1px dashed #A5D6A7; width: 100%; }
+  .btn-add-agenda:hover { background: #C8E6C9; }
   .btn-reset { background: #FFF3E0; color: #E65100; padding: 8px 16px; font-size: 12px; border-radius: 6px; border: 1px solid #FFCC80; width: 100%; margin-top: 6px; }
   .btn-reset:hover { background: #FFE0B2; }
 
@@ -156,11 +173,11 @@ var PROGRAMME_DATA = {
   source_version: "Program_v3",
   source_date: "May 2026",
   day_groups: [
-    { id: "pre_conference", label: "Pre-conference MON 31 AUG 2026" },
-    { id: "day_1", label: "Day 1 TUE 1 SEP 2026" },
-    { id: "day_2", label: "Day 2 WED 2 SEP 2026" },
-    { id: "day_3", label: "Day 3 THU 3 SEP 2026" },
-    { id: "post_conference", label: "Post-conference FRI 4 SEP 2026" }
+    { id: "pre_conference", date_label: "MON 31 AUG 2026", title_label: "Pre-conference" },
+    { id: "day_1", date_label: "TUE 1 SEP 2026", title_label: "Day 1" },
+    { id: "day_2", date_label: "WED 2 SEP 2026", title_label: "Day 2" },
+    { id: "day_3", date_label: "THU 3 SEP 2026", title_label: "Day 3" },
+    { id: "post_conference", date_label: "FRI 4 SEP 2026", title_label: "Post-conference" }
   ],
   events: [
     {event_id:"pre-site-visit-greenway",source_version:"Program_v3",day_group:"pre_conference",day_label:"Pre-conference MON",title:"Site Visit 1: GreenWay",start_time:null,end_time:null,time_label:null,venue:"GreenWay",lead:"Susan Thompson",subtheme:null,session_type:"visit",access_type:"open",summary:"Site Visits (2-3)",notes:null,source_page:1,source_text:"Site Visits (2-3)\n1. GreenWay (Lead: Susan Thompson)",display_order:1},
@@ -170,8 +187,8 @@ var PROGRAMME_DATA = {
     {event_id:"pre-welcome-reception",source_version:"Program_v3",day_group:"pre_conference",day_label:"Pre-conference MON",title:"Welcome Reception & Exhibition",start_time:"17:00",end_time:"19:00",time_label:"17:00-19:00",venue:"UNSW Precincts / Health Translation Hub",lead:null,subtheme:null,session_type:"reception",access_type:"open",summary:"Theme of exhibition: First Nations place and health",notes:"Theme of exhibition: First Nations place and health",source_page:1,source_text:"17:00-19:00\nWelcome Reception & Exhibition\nTheme of exhibition: First Nations place and health\nHealth Translation Hub\nUNSW Precincts",display_order:5},
     {event_id:"d1-exhibition",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Exhibition & Poster Presentation UNSW Showcase",start_time:null,end_time:null,time_label:null,venue:null,lead:null,subtheme:null,session_type:"exhibition",access_type:"open",summary:null,notes:null,source_page:1,source_text:"Exhibition & Poster Presentation\nUNSW Showcase",display_order:1},
     {event_id:"d1-welcome-to-country",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Opening Welcome to Country",start_time:null,end_time:null,time_label:null,venue:null,lead:null,subtheme:null,session_type:"plenary",access_type:"open",summary:null,notes:null,source_page:1,source_text:"Opening Welcome to Country",display_order:2},
-    {event_id:"d1-tech-workshops-1",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Technical Workshops 1",start_time:"09:30",end_time:"10:45",time_label:"09:30-10:45",venue:null,lead:null,subtheme:null,session_type:"workshop",access_type:"open",summary:"5-6 parallel workshops",notes:"5-6 parallel workshops",source_page:1,source_text:"09:30-10:45 Technical workshops 1\n5-6 parallel workshops",display_order:3},
-    {event_id:"d1-tech-workshops-2",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Technical Workshops 2",start_time:"11:15",end_time:"12:30",time_label:"11:15-12:30",venue:null,lead:null,subtheme:null,session_type:"workshop",access_type:"open",summary:"5-6 parallel workshops",notes:"5-6 parallel workshops",source_page:1,source_text:"11:15-12:30 Technical workshops 2\n5-6 parallel workshops",display_order:4},
+    {event_id:"d1-tech-workshops-1",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Technical Workshops 1",start_time:"09:30",end_time:"10:45",time_label:"09:30-10:45",venue:null,lead:null,subtheme:null,session_type:"workshop",access_type:"open",summary:"5-6 parallel workshops",notes:"5-6 parallel workshops",source_page:1,source_text:"09:30-10:45 Technical workshops 1\n5-6 parallel workshops",display_order:3,agenda:[{topic:"Workshop 1A",speaker:"TBD",time:"09:30-10:45",description:null},{topic:"Workshop 1B",speaker:"TBD",time:"09:30-10:45",description:null},{topic:"Workshop 1C",speaker:"TBD",time:"09:30-10:45",description:null},{topic:"Workshop 1D",speaker:"TBD",time:"09:30-10:45",description:null},{topic:"Workshop 1E",speaker:"TBD",time:"09:30-10:45",description:null},{topic:"Workshop 1F",speaker:"TBD",time:"09:30-10:45",description:null}]},
+    {event_id:"d1-tech-workshops-2",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Technical Workshops 2",start_time:"11:15",end_time:"12:30",time_label:"11:15-12:30",venue:null,lead:null,subtheme:null,session_type:"workshop",access_type:"open",summary:"5-6 parallel workshops",notes:"5-6 parallel workshops",source_page:1,source_text:"11:15-12:30 Technical workshops 2\n5-6 parallel workshops",display_order:4,agenda:[{topic:"Workshop 2A",speaker:"TBD",time:"11:15-12:30",description:null},{topic:"Workshop 2B",speaker:"TBD",time:"11:15-12:30",description:null},{topic:"Workshop 2C",speaker:"TBD",time:"11:15-12:30",description:null},{topic:"Workshop 2D",speaker:"TBD",time:"11:15-12:30",description:null},{topic:"Workshop 2E",speaker:"TBD",time:"11:15-12:30",description:null},{topic:"Workshop 2F",speaker:"TBD",time:"11:15-12:30",description:null}]},
     {event_id:"d1-lunch",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Lunch",start_time:"12:30",end_time:"14:00",time_label:"12:30-14:00",venue:null,lead:null,subtheme:null,session_type:"break",access_type:"open",summary:"Lunch break",notes:null,source_page:1,source_text:"12:30-14:00 Lunch",display_order:5},
     {event_id:"d1-opening-plenary",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Opening Plenary & Mayors Commitment",start_time:"14:00",end_time:"15:15",time_label:"14:00-15:15 (75min)",venue:"Clancy Auditorium",lead:"Jinhee Kim & Kelly Andrews",subtheme:null,session_type:"plenary",access_type:"open",summary:"Opening plenary session with Mayors Commitment",notes:null,source_page:1,source_text:"14:00-15:15 Opening Plenary & Mayors Commitment (75min)\nClancy Auditorium\nLead: Jinhee Kim & Kelly Andrews",display_order:6},
     {event_id:"d1-afternoon-tea",source_version:"Program_v3",day_group:"day_1",day_label:"Day 1 TUE",title:"Afternoon Tea",start_time:"15:15",end_time:"15:45",time_label:"15:15-15:45",venue:null,lead:null,subtheme:null,session_type:"break",access_type:"open",summary:"Afternoon tea (400 pax)",notes:"400 pax",source_page:1,source_text:"15:15-15:45 Afternoon tea (400 pax)",display_order:7},
@@ -180,11 +197,11 @@ var PROGRAMME_DATA = {
     {event_id:"d2-exhibition",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Exhibition & Poster Presentation UNSW Showcase",start_time:null,end_time:null,time_label:null,venue:null,lead:null,subtheme:null,session_type:"exhibition",access_type:"open",summary:null,notes:null,source_page:1,source_text:"Exhibition & Poster Presentation\nUNSW Showcase",display_order:1},
     {event_id:"d2-plenary-2",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Plenary 2",start_time:"09:00",end_time:"10:15",time_label:"09:00-10:15 (75min)",venue:"Clancy Auditorium",lead:"WHO-WPRO",subtheme:"Health across the life course",session_type:"plenary",access_type:"open",summary:"Plenary session on health across the life course",notes:null,source_page:1,source_text:"09:00-10:15 Plenary 2 (75min)\nSub-theme: health across the life course\nClancy Auditorium\nLead: WHO-WPRO",display_order:2},
     {event_id:"d2-morning-tea",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Morning Tea",start_time:"10:15",end_time:"10:45",time_label:"10:15-10:45",venue:null,lead:null,subtheme:null,session_type:"break",access_type:"open",summary:"Morning tea break",notes:null,source_page:1,source_text:"10:15-10:45 Morning tea",display_order:3},
-    {event_id:"d2-parallel-1",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Parallel 1",start_time:"10:45",end_time:"12:00",time_label:"10:45-12:00 (75min)",venue:null,lead:"Scientific Committee",subtheme:null,session_type:"parallel",access_type:"open",summary:null,notes:null,source_page:1,source_text:"10:45-12:00 Parallel 1 (75min)\nLead: Scientific Committee",display_order:4},
+    {event_id:"d2-parallel-1",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Parallel 1",start_time:"10:45",end_time:"12:00",time_label:"10:45-12:00 (75min)",venue:null,lead:"Scientific Committee",subtheme:null,session_type:"parallel",access_type:"open",summary:"Parallel sessions led by Scientific Committee",notes:null,source_page:1,source_text:"10:45-12:00 Parallel 1 (75min)\nLead: Scientific Committee",display_order:4,agenda:[{topic:"Session 1.1",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 1.2",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 1.3",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 1.4",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 1.5",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 1.6",speaker:"TBD",time:"10:45-12:00",description:null}]},
     {event_id:"d2-vip-program",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"VIP Program",start_time:"10:45",end_time:"15:30",time_label:"10:45-15:30",venue:"Off-site",lead:"Committee for Sydney",subtheme:null,session_type:"vip_program",access_type:"invitation_only",summary:"Off-site VIP programme, invitation only",notes:"Off-site, invitation only",source_page:1,source_text:"10:45-15:30\nVIP Program\n(off-site, invitation only)\nLead: Committee for Sydney",display_order:5},
     {event_id:"d2-lunch",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Lunch",start_time:"12:00",end_time:"13:00",time_label:"12:00-13:00",venue:null,lead:null,subtheme:null,session_type:"break",access_type:"open",summary:"Lunch break",notes:null,source_page:1,source_text:"12:00-13:00 Lunch",display_order:6},
-    {event_id:"d2-parallel-2",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Parallel 2",start_time:"13:00",end_time:"14:15",time_label:"13:00-14:15 (75min)",venue:null,lead:null,subtheme:null,session_type:"parallel",access_type:"open",summary:null,notes:null,source_page:1,source_text:"13:00-14:15 Parallel 2 (75min)",display_order:7},
-    {event_id:"d2-parallel-3",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Parallel 3",start_time:"14:30",end_time:"15:45",time_label:"14:30-15:45 (75min)",venue:null,lead:null,subtheme:null,session_type:"parallel",access_type:"open",summary:null,notes:null,source_page:1,source_text:"14:30-15:45 Parallel 3 (75min)",display_order:8},
+    {event_id:"d2-parallel-2",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Parallel 2",start_time:"13:00",end_time:"14:15",time_label:"13:00-14:15 (75min)",venue:null,lead:null,subtheme:null,session_type:"parallel",access_type:"open",summary:"Parallel sessions",notes:null,source_page:1,source_text:"13:00-14:15 Parallel 2 (75min)",display_order:7,agenda:[{topic:"Session 2.1",speaker:"TBD",time:"13:00-14:15",description:null},{topic:"Session 2.2",speaker:"TBD",time:"13:00-14:15",description:null},{topic:"Session 2.3",speaker:"TBD",time:"13:00-14:15",description:null},{topic:"Session 2.4",speaker:"TBD",time:"13:00-14:15",description:null},{topic:"Session 2.5",speaker:"TBD",time:"13:00-14:15",description:null},{topic:"Session 2.6",speaker:"TBD",time:"13:00-14:15",description:null}]},
+    {event_id:"d2-parallel-3",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Parallel 3",start_time:"14:30",end_time:"15:45",time_label:"14:30-15:45 (75min)",venue:null,lead:null,subtheme:null,session_type:"parallel",access_type:"open",summary:"Parallel sessions",notes:null,source_page:1,source_text:"14:30-15:45 Parallel 3 (75min)",display_order:8,agenda:[{topic:"Session 3.1",speaker:"TBD",time:"14:30-15:45",description:null},{topic:"Session 3.2",speaker:"TBD",time:"14:30-15:45",description:null},{topic:"Session 3.3",speaker:"TBD",time:"14:30-15:45",description:null},{topic:"Session 3.4",speaker:"TBD",time:"14:30-15:45",description:null},{topic:"Session 3.5",speaker:"TBD",time:"14:30-15:45",description:null},{topic:"Session 3.6",speaker:"TBD",time:"14:30-15:45",description:null}]},
     {event_id:"d2-afternoon-tea",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Afternoon Tea",start_time:"15:45",end_time:"16:00",time_label:"15:45-16:00",venue:null,lead:null,subtheme:null,session_type:"break",access_type:"open",summary:"Afternoon tea break",notes:null,source_page:1,source_text:"15:45-16:00 Afternoon tea",display_order:9},
     {event_id:"d2-plenary-3",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Plenary 3",start_time:"16:00",end_time:"17:00",time_label:"16:00-17:00 (60 min)",venue:"Clancy Auditorium",lead:"HCA (Kelly Andrews)",subtheme:"Urbanisation challenges and governance for healthy cities",session_type:"plenary",access_type:"open",summary:"Delegates travel to Circular Quay after this session",notes:"Delegates travel to Circular Quay",source_page:1,source_text:"16:00-17:00 Plenary 3 (60 min)\nSub-theme: urbanisation challenges and governance for healthy cities\nClancy Auditorium\nLead: HCA (Kelly Andrews)\n(Delegates travel to Circular Quay)",display_order:10},
     {event_id:"d2-conference-dinner",source_version:"Program_v3",day_group:"day_2",day_label:"Day 2 WED",title:"Conference Dinner",start_time:"19:00",end_time:"21:00",time_label:"19:00-21:00",venue:"Museum of Contemporary Art (Circular Quay)",lead:null,subtheme:null,session_type:"dinner",access_type:"ticketed",summary:"Conference dinner at MCA, Circular Quay",notes:"Ticketed",source_page:2,source_text:"19:00-21:00 Conference Dinner (ticketed)\nMuseum of Contemporary Art (Circular Quay)",display_order:11},
@@ -192,7 +209,7 @@ var PROGRAMME_DATA = {
     {event_id:"d3-general-assembly",source_version:"Program_v3",day_group:"day_3",day_label:"Day 3 THU",title:"AFHC General Assembly",start_time:"09:00",end_time:"10:15",time_label:"09:00-10:15",venue:"Leighton Hall",lead:null,subtheme:null,session_type:"assembly",access_type:"members_only",summary:"AFHC General Assembly, members only",notes:"Members only",source_page:1,source_text:"09:00-10:15\nAFHC General Assembly\n(members only)\nLeighton Hall",display_order:2},
     {event_id:"d3-public-sessions",source_version:"Program_v3",day_group:"day_3",day_label:"Day 3 THU",title:"Public Sessions",start_time:"09:00",end_time:"10:15",time_label:"09:00-10:15",venue:null,lead:null,subtheme:null,session_type:"public_session",access_type:"open",summary:"2-3 multiple parallel sessions",notes:"2-3 multiple parallel sessions",source_page:1,source_text:"09:00-10:15\nPublic sessions\n(2-3 multiple parallel sessions)",display_order:3},
     {event_id:"d3-morning-tea",source_version:"Program_v3",day_group:"day_3",day_label:"Day 3 THU",title:"Morning Tea",start_time:"10:15",end_time:"10:45",time_label:"10:15-10:45",venue:null,lead:null,subtheme:null,session_type:"break",access_type:"open",summary:"Morning tea break",notes:null,source_page:1,source_text:"10:15-10:45 Morning tea",display_order:4},
-    {event_id:"d3-parallel-4",source_version:"Program_v3",day_group:"day_3",day_label:"Day 3 THU",title:"Parallel 4",start_time:"10:45",end_time:"12:00",time_label:"10:45-12:00 (75 min)",venue:null,lead:null,subtheme:null,session_type:"parallel",access_type:"open",summary:"6 concurrent sessions",notes:"6 concurrent sessions",source_page:1,source_text:"10:45-12:00 Parallel 4 (75 min)\n6 concurrent sessions",display_order:5},
+    {event_id:"d3-parallel-4",source_version:"Program_v3",day_group:"day_3",day_label:"Day 3 THU",title:"Parallel 4",start_time:"10:45",end_time:"12:00",time_label:"10:45-12:00 (75 min)",venue:null,lead:null,subtheme:null,session_type:"parallel",access_type:"open",summary:"6 concurrent sessions",notes:"6 concurrent sessions",source_page:1,source_text:"10:45-12:00 Parallel 4 (75 min)\n6 concurrent sessions",display_order:5,agenda:[{topic:"Session 4.1",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 4.2",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 4.3",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 4.4",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 4.5",speaker:"TBD",time:"10:45-12:00",description:null},{topic:"Session 4.6",speaker:"TBD",time:"10:45-12:00",description:null}]},
     {event_id:"d3-lunch",source_version:"Program_v3",day_group:"day_3",day_label:"Day 3 THU",title:"Lunch",start_time:"12:00",end_time:"13:00",time_label:"12:00-13:00",venue:null,lead:null,subtheme:null,session_type:"break",access_type:"open",summary:"Lunch break",notes:null,source_page:1,source_text:"12:00-13:00 Lunch",display_order:6},
     {event_id:"d3-plenary-4",source_version:"Program_v3",day_group:"day_3",day_label:"Day 3 THU",title:"Plenary 4",start_time:"13:00",end_time:"14:15",time_label:"13:00-14:15 (75 min)",venue:"Leighton Hall",lead:"UNSW Cities Institute & WHO Asia-Pacific Centre for Environment and Health",subtheme:"Urbanisation and indigenous knowledge",session_type:"plenary",access_type:"open",summary:"Plenary on urbanisation and indigenous knowledge",notes:null,source_page:1,source_text:"13:00-14:15 Plenary 4 (75 min)\nSub-theme: urbanisation and indigenous knowledge\nLeighton Hall\nLead: UNSW Cities Institute & WHO Asia-Pacific Centre for Environment and Health",display_order:7},
     {event_id:"d3-closing-ceremony",source_version:"Program_v3",day_group:"day_3",day_label:"Day 3 THU",title:"Closing Ceremony",start_time:"14:15",end_time:"14:30",time_label:"14:15-14:30 (15 min)",venue:"Leighton Hall",lead:"Jinhee Kim & Kelly Andrews",subtheme:null,session_type:"plenary",access_type:"open",summary:"End of Conference",notes:"End of Conference",source_page:1,source_text:"14:15-14:30 Closing Ceremony (15 min)\nLeighton Hall\nLead: Jinhee Kim & Kelly Andrews\nEnd of Conference",display_order:8},
@@ -319,7 +336,7 @@ var PROGRAMME_DATA = {
   var day_groups = PROGRAMME_DATA.day_groups;
   var baseEvents = PROGRAMME_DATA.events;
   var dayLabelMap = {};
-  day_groups.forEach(function(group) { dayLabelMap[group.id] = group.label; });
+  day_groups.forEach(function(group) { dayLabelMap[group.id] = { date_label: group.date_label, title_label: group.title_label }; });
 
   function formatLabel(s) { return s.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }); }
   function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
@@ -330,7 +347,7 @@ var PROGRAMME_DATA = {
   var typeSelect = document.getElementById('filterType');
   var venueSelect = document.getElementById('filterVenue');
   var accessSelect = document.getElementById('filterAccess');
-  day_groups.forEach(function(g) { var o = document.createElement('option'); o.value = g.id; o.textContent = g.label; daySelect.appendChild(o); });
+  day_groups.forEach(function(g) { var o = document.createElement('option'); o.value = g.id; o.textContent = g.date_label + ' — ' + g.title_label; daySelect.appendChild(o); });
   var sessionTypes = []; baseEvents.forEach(function(e) { if (sessionTypes.indexOf(e.session_type) === -1) sessionTypes.push(e.session_type); }); sessionTypes.sort();
   sessionTypes.forEach(function(t) { var o = document.createElement('option'); o.value = t; o.textContent = formatLabel(t); typeSelect.appendChild(o); });
   var venues = []; baseEvents.forEach(function(e) { if (e.venue && venues.indexOf(e.venue) === -1) venues.push(e.venue); }); venues.sort();
@@ -346,7 +363,7 @@ var PROGRAMME_DATA = {
       col.className = 'day-column';
       col.dataset.day = group.id;
       var dayEvents = baseEvents.filter(function(e) { return e.day_group === group.id; }).sort(function(a, b) { return a.display_order - b.display_order; });
-      col.innerHTML = '<div class="day-header">' + group.label + ' <span class="day-count">' + dayEvents.length + '</span></div><div class="cards-list"></div>';
+      col.innerHTML = '<div class="day-header"><div class="day-header-text"><div class="day-date">' + group.date_label + '</div><div class="day-title">' + group.title_label + '</div></div><span class="day-count">' + dayEvents.length + '</span></div><div class="cards-list"></div>';
       var list = col.querySelector('.cards-list');
       dayEvents.forEach(function(ev) { list.appendChild(createCard(ev)); });
       board.appendChild(col);
@@ -413,13 +430,14 @@ var PROGRAMME_DATA = {
   function openDetail(baseEv) {
     currentBaseEv = baseEv;
     var ev = getEvent(baseEv);
-    var detailDayLabel = dayLabelMap[ev.day_group] || ev.day_label;
+    var detailDay = dayLabelMap[ev.day_group] || { date_label: ev.day_label, title_label: '' };
     document.querySelectorAll('.card.active').forEach(function(c) { c.classList.remove('active'); });
     var ac = document.querySelector('.card[data-event-id="' + baseEv.event_id + '"]');
     if (ac) ac.classList.add('active');
     var html = '<button class="detail-close" id="detailClose">&times;</button>';
     html += '<div class="view-content">';
-    html += '<div class="detail-day">' + esc(detailDayLabel) + '</div>';
+    html += '<div class="detail-day">' + esc(detailDay.date_label) + '</div>';
+    if (detailDay.title_label) html += '<div class="detail-subday">' + esc(detailDay.title_label) + '</div>';
     html += '<div class="detail-title">' + esc(ev.title) + '</div>';
     html += '<div class="detail-tags">';
     html += '<span class="' + (ev.session_type === 'break' ? 'tag tag-session-break' : 'tag tag-session') + '">' + formatLabel(ev.session_type) + '</span>';
@@ -431,10 +449,25 @@ var PROGRAMME_DATA = {
     if (ev.subtheme) html += '<div class="detail-section"><div class="detail-label">Sub-theme</div><div class="detail-value">' + esc(ev.subtheme) + '</div></div>';
     if (ev.notes) html += '<div class="detail-section"><div class="detail-label">Programme Details</div><div class="detail-value">' + esc(ev.notes) + '</div></div>';
     else if (ev.summary) html += '<div class="detail-section"><div class="detail-label">Programme Details</div><div class="detail-value">' + esc(ev.summary) + '</div></div>';
+    if ((ev.agenda || []).length > 0) {
+      html += '<hr class="detail-divider">';
+      html += '<div class="detail-label">Sub-sessions</div>';
+      html += '<ul class="agenda-list">';
+      ev.agenda.forEach(function(a) {
+        html += '<li class="agenda-item">';
+        if (a.time) html += '<div class="agenda-item-time">' + esc(a.time) + '</div>';
+        if (a.topic) html += '<div class="agenda-item-topic">' + esc(a.topic) + '</div>';
+        if (a.speaker) html += '<div class="agenda-item-speaker">' + esc(a.speaker) + '</div>';
+        if (a.description) html += '<div class="agenda-item-desc">' + esc(a.description) + '</div>';
+        html += '</li>';
+      });
+      html += '</ul>';
+    }
     html += '</div>';
 
     html += '<div class="edit-form">';
-    html += '<div class="detail-day">' + esc(detailDayLabel) + ' — Edit Mode</div>';
+    html += '<div class="detail-day">' + esc(detailDay.date_label) + '</div>';
+    if (detailDay.title_label) html += '<div class="detail-subday">' + esc(detailDay.title_label) + ' — Edit Mode</div>';
     html += '<div class="edit-group"><label>Title</label><input type="text" id="ef-title" value="' + attr(ev.title) + '"></div>';
     html += '<div class="edit-row">';
     html += '<div class="edit-group"><label>Start Time</label><input type="text" id="ef-start" value="' + attr(ev.start_time) + '" placeholder="HH:MM"></div>';
@@ -444,7 +477,15 @@ var PROGRAMME_DATA = {
     html += '<div class="edit-group"><label>Venue</label><input type="text" id="ef-venue" value="' + attr(ev.venue) + '"></div>';
     html += '<div class="edit-group"><label>Lead</label><input type="text" id="ef-lead" value="' + attr(ev.lead) + '"></div>';
     html += '<div class="edit-group"><label>Sub-theme</label><input type="text" id="ef-subtheme" value="' + attr(ev.subtheme) + '"></div>';
+    html += '<div class="edit-group"><label>Summary</label><textarea id="ef-summary">' + esc(ev.summary || '') + '</textarea></div>';
     html += '<div class="edit-group"><label>Programme Details</label><textarea id="ef-notes">' + esc(ev.notes || '') + '</textarea></div>';
+    html += '<div class="agenda-edit-section">';
+    html += '<div class="agenda-edit-title">Sub-sessions</div>';
+    html += '<div id="agendaEntries">';
+    (ev.agenda || []).forEach(function(a, i) { html += agendaEntryHTML(a, i); });
+    html += '</div>';
+    html += '<button class="btn btn-add-agenda" id="btnAddAgenda">+ Add Sub-session</button>';
+    html += '</div>';
     html += '<button class="btn btn-save" id="btnSave">Save to GitHub</button>';
     if (hasEdits(baseEv.event_id)) html += '<button class="btn btn-reset" id="btnReset">Reset to Original</button>';
     html += '</div>';
@@ -456,7 +497,30 @@ var PROGRAMME_DATA = {
     if (adminMode) bindEditHandlers(baseEv);
   }
 
+  function agendaEntryHTML(a, idx) {
+    return '<div class="agenda-entry" data-idx="' + idx + '">' +
+      '<button class="agenda-entry-remove" data-idx="' + idx + '">&times;</button>' +
+      '<div class="edit-row"><div class="edit-group"><label>Time</label><input type="text" class="ag-time" value="' + attr(a.time) + '" placeholder="e.g. 14:00-14:20"></div>' +
+      '<div class="edit-group"><label>Speaker</label><input type="text" class="ag-speaker" value="' + attr(a.speaker) + '"></div></div>' +
+      '<div class="edit-group"><label>Topic</label><input type="text" class="ag-topic" value="' + attr(a.topic) + '"></div>' +
+      '<div class="edit-group"><label>Description</label><textarea class="ag-desc" rows="2">' + esc(a.description || '') + '</textarea></div>' +
+      '</div>';
+  }
+
   function bindEditHandlers(baseEv) {
+    var agendaIdx = (getEvent(baseEv).agenda || []).length;
+    document.getElementById('btnAddAgenda').addEventListener('click', function() {
+      var container = document.getElementById('agendaEntries');
+      var div = document.createElement('div');
+      div.innerHTML = agendaEntryHTML({ time: '', speaker: '', topic: '', description: '' }, agendaIdx++);
+      var entry = div.firstChild;
+      container.appendChild(entry);
+      entry.querySelector('.agenda-entry-remove').addEventListener('click', function() { entry.remove(); });
+    });
+    document.querySelectorAll('.agenda-entry-remove').forEach(function(btn) {
+      btn.addEventListener('click', function() { btn.closest('.agenda-entry').remove(); });
+    });
+
     document.getElementById('btnSave').addEventListener('click', function() {
       var saveBtn = document.getElementById('btnSave');
       saveBtn.disabled = true;
@@ -471,6 +535,7 @@ var PROGRAMME_DATA = {
         venue: 'ef-venue',
         lead: 'ef-lead',
         subtheme: 'ef-subtheme',
+        summary: 'ef-summary',
         notes: 'ef-notes'
       };
       for (var key in fields) {
@@ -478,6 +543,19 @@ var PROGRAMME_DATA = {
         if (val === '') val = null;
         if (val !== (baseEv[key] || null)) changes[key] = val;
       }
+
+      var agendaItems = [];
+      document.querySelectorAll('.agenda-entry').forEach(function(entry) {
+        var item = {
+          time: entry.querySelector('.ag-time').value.trim() || null,
+          speaker: entry.querySelector('.ag-speaker').value.trim() || null,
+          topic: entry.querySelector('.ag-topic').value.trim() || null,
+          description: entry.querySelector('.ag-desc').value.trim() || null
+        };
+        if (item.time || item.speaker || item.topic || item.description) agendaItems.push(item);
+      });
+      if (agendaItems.length > 0) changes.agenda = agendaItems;
+      else if ((baseEv.agenda || []).length > 0) changes.agenda = [];
 
       if (Object.keys(changes).length > 0) edits[baseEv.event_id] = Object.assign(edits[baseEv.event_id] || {}, changes);
       if (edits[baseEv.event_id]) {
