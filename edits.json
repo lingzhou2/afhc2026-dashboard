@@ -6,5 +6,50 @@
     "lead": "Clancy AuditoriumClancy AuditoriumClancy AuditoriumClancy AuditoriumClancy Auditorium",
     "subtheme": "Clancy AuditoriumClancy AuditoriumClancy AuditoriumClancy Auditorium",
     "summary": "AFHC General Assembly, members onlyClancy AuditoriumClancy AuditoriumClancy AuditoriumClancy AuditoriumClancy AuditoriumClancy Auditorium"
+  },
+  "d1-tech-workshops-1": {
+    "venue": "Clancy AuditoriumClancy AuditoriumClancy AuditoriumClancy AuditoriumClancy Auditorium",
+    "lead": "Clancy AuditoriumClancy AuditoriumClancy Auditorium",
+    "subtheme": "Clancy AuditoriumClancy AuditoriumClancy AuditoriumClancy Auditorium",
+    "summary": "5-6 parallel workshopsClancy AuditoriumClancy AuditoriumClancy AuditoriumClancy Auditorium",
+    "notes": "5-6 parallel workshopsClancy AuditoriumClancy Auditorium",
+    "agenda": [
+      {
+        "time": "09:30-10:45",
+        "speaker": "TBD",
+        "topic": "Workshop 1A",
+        "description": null
+      },
+      {
+        "time": "09:30-10:45",
+        "speaker": "TBD",
+        "topic": "Workshop 1B",
+        "description": null
+      },
+      {
+        "time": "09:30-10:45",
+        "speaker": "TBD",
+        "topic": "Workshop 1C",
+        "description": null
+      },
+      {
+        "time": "09:30-10:45",
+        "speaker": "TBD",
+        "topic": "Workshop 1D",
+        "description": null
+      },
+      {
+        "time": "09:30-10:45",
+        "speaker": "TBD",
+        "topic": "Workshop 1E",
+        "description": null
+      },
+      {
+        "time": "09:30-10:45",
+        "speaker": "TBD",
+        "topic": "Workshop 1F",
+        "description": null
+      }
+    ]
   }
 }
