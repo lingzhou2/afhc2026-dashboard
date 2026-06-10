@@ -1,1 +1,68 @@
-{}
+{
+  "post-site-visit-western-sydney": {
+    "venue": "Western SydneyWestern SydneyWestern SydneyWestern Sydney"
+  },
+  "d2-plenary-2": {
+    "subtheme": "Health across the life course Health across the life courseHealth across the life course",
+    "summary": "Plenary session on health across the life courseHealth across the life courseHealth across the life courseHealth across the life course",
+    "notes": "Health across the life courseHealth across the life courseHealth across the life course"
+  },
+  "d1-tech-workshops-2": {
+    "venue": "Health across the life course",
+    "lead": "Health across the life courseHealth across the life course",
+    "agenda": [
+      {
+        "time": "11:15-12:30",
+        "speaker": "TBD",
+        "topic": "Workshop 2A",
+        "description": null
+      },
+      {
+        "time": "11:15-12:30",
+        "speaker": "TBD",
+        "topic": "Workshop 2B",
+        "description": null
+      },
+      {
+        "time": "11:15-12:30",
+        "speaker": "TBD",
+        "topic": "Workshop 2C",
+        "description": null
+      },
+      {
+        "time": "11:15-12:30",
+        "speaker": "TBD",
+        "topic": "Workshop 2D",
+        "description": null
+      },
+      {
+        "time": "11:15-12:30",
+        "speaker": "TBD",
+        "topic": "Workshop 2E",
+        "description": null
+      },
+      {
+        "time": "11:15-12:30",
+        "speaker": "TBD",
+        "topic": "Workshop 2F",
+        "description": null
+      }
+    ]
+  },
+  "post-site-visit-tbd": {
+    "agenda": [
+      {
+        "time": "eeee",
+        "speaker": "eee",
+        "topic": "eee",
+        "description": "ee"
+      },
+      {
+        "time": "eee",
+        "speaker": "ee",
+        "topic": "eee",
+        "description": "eee"
+      }
+    ]
+  }
+}
