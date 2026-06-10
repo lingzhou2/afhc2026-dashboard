@@ -16,5 +16,45 @@
         "description": "13:00"
       }
     ]
+  },
+  "d1-tech-workshops-1": {
+    "agenda": [
+      {
+        "time": "09:30-10:45",
+        "speaker": "TBD",
+        "topic": "Workshop 1A",
+        "description": null
+      },
+      {
+        "time": "09:30-10:45",
+        "speaker": "TBD",
+        "topic": "Workshop 1B",
+        "description": null
+      },
+      {
+        "time": "09:30-10:45",
+        "speaker": "TBD",
+        "topic": "Workshop 1C",
+        "description": null
+      },
+      {
+        "time": "09:30-10:45",
+        "speaker": "TBD",
+        "topic": "Workshop 1D",
+        "description": null
+      },
+      {
+        "time": "09:30-10:45",
+        "speaker": "TBD",
+        "topic": "Workshop 1E",
+        "description": null
+      },
+      {
+        "time": "09:30-10:45",
+        "speaker": "TBD",
+        "topic": "Workshop 1F",
+        "description": null
+      }
+    ]
   }
 }
