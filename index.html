@@ -238,6 +238,10 @@ var PROGRAMME_DATA = {
     setTimeout(function() { t.classList.remove('show'); }, 2500);
   }
 
+  function sameValue(a, b) {
+    return JSON.stringify(a === undefined ? null : a) === JSON.stringify(b === undefined ? null : b);
+  }
+
   function getEvent(ev) {
     var merged = Object.assign({}, ev);
     if (edits[ev.event_id]) Object.assign(merged, edits[ev.event_id]);
@@ -315,7 +319,12 @@ var PROGRAMME_DATA = {
         })
       })
         .then(function(r) {
-          if (!r.ok) throw new Error('HTTP ' + r.status);
+          if (!r.ok) {
+            return r.json().catch(function() { return {}; }).then(function(errData) {
+              var message = errData && errData.message ? errData.message : 'HTTP ' + r.status;
+              throw new Error('HTTP ' + r.status + ': ' + message);
+            });
+          }
           return r.json();
         })
         .then(function(data) {
@@ -327,10 +336,24 @@ var PROGRAMME_DATA = {
         .catch(function(err) {
           showLoading(100);
           hideLoading();
-          showToast('Save failed: ' + err.message);
+          if (err.message.indexOf('HTTP 403') === 0) {
+            showToast('Save failed: GitHub denied write access. Check token scope and repo write permission.');
+          } else {
+            showToast('Save failed: ' + err.message);
+          }
           if (callback) callback(false);
         });
     });
+  }
+
+  function verifyRemoteEdits(callback) {
+    fetch(RAW_URL + '?t=' + Date.now())
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function(data) { callback(true, data || {}); })
+      .catch(function() { callback(false, null); });
   }
 
   var day_groups = PROGRAMME_DATA.day_groups;
@@ -557,11 +580,18 @@ var PROGRAMME_DATA = {
       if (agendaItems.length > 0) changes.agenda = agendaItems;
       else if ((baseEv.agenda || []).length > 0) changes.agenda = [];
 
+      if (Object.keys(changes).length === 0) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save to GitHub';
+        showToast('No changes to save');
+        return;
+      }
+
       if (Object.keys(changes).length > 0) edits[baseEv.event_id] = Object.assign(edits[baseEv.event_id] || {}, changes);
       if (edits[baseEv.event_id]) {
         var empty = true;
         for (var prop in edits[baseEv.event_id]) {
-          if (edits[baseEv.event_id][prop] !== baseEv[prop]) {
+          if (!sameValue(edits[baseEv.event_id][prop], baseEv[prop])) {
             empty = false;
             break;
           }
@@ -573,9 +603,23 @@ var PROGRAMME_DATA = {
         saveBtn.disabled = false;
         saveBtn.textContent = 'Save to GitHub';
         if (ok) {
-          buildBoard();
-          openDetail(baseEv);
-          showToast('Saved: ' + (getEvent(baseEv).title || baseEv.title));
+          verifyRemoteEdits(function(verified, remoteData) {
+            if (!verified) {
+              showToast('Saved to GitHub, but could not verify remote update yet');
+              buildBoard();
+              openDetail(baseEv);
+              return;
+            }
+            edits = remoteData || {};
+            var remoteEntry = edits[baseEv.event_id];
+            if (remoteEntry || Object.keys(changes).length === 0) {
+              showToast('Saved and verified: ' + (getEvent(baseEv).title || baseEv.title));
+            } else {
+              showToast('Save may not have persisted. Please refresh and check edits.json.');
+            }
+            buildBoard();
+            openDetail(baseEv);
+          });
         }
       });
     });
