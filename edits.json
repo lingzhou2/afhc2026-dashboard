@@ -4,5 +4,46 @@
   },
   "pre-first-nations-exhibition": {
     "notes": "Confirmed. Organiser: UNSW Precincts; contact: Kerry Turnbull"
+  },
+  "d1-tech-workshops-1": {
+    "notes": "classroom style.",
+    "agenda": [
+      {
+        "time": "10:00-11:15",
+        "speaker": "WHO & CI",
+        "topic": "Workshop 1A: WHO-WPRO (1)",
+        "description": "Contact: Marjan Molemans"
+      },
+      {
+        "time": "10:00-11:15",
+        "speaker": "UNSW, CI, SNU, PHS",
+        "topic": "Workshop 1B: Place Standard Tool (1)",
+        "description": "Contact: Ling Zhou"
+      },
+      {
+        "time": "10:00-11:15",
+        "speaker": "RMIT",
+        "topic": "Workshop 1C: RMIT Global Observatory",
+        "description": null
+      },
+      {
+        "time": "10:00-11:15",
+        "speaker": "TBD",
+        "topic": "Workshop 1D: Health Promotion Journal of Australia",
+        "description": null
+      },
+      {
+        "time": "10:00-11:15",
+        "speaker": "TBD",
+        "topic": "Workshop 1E",
+        "description": null
+      },
+      {
+        "time": "10:00-11:15",
+        "speaker": "TBD",
+        "topic": "Workshop 1F",
+        "description": null
+      }
+    ]
   }
 }
