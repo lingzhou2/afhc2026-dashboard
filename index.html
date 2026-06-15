@@ -448,7 +448,7 @@ var PROGRAMME_DATA = {
     var html = '<div class="card-title">' + esc(ev.title) + '</div>';
     if (ev.time_label) html += '<div class="card-time">' + esc(ev.time_label) + '</div>';
     if (ev.venue) html += '<div class="card-venue">' + esc(ev.venue) + '</div>';
-    if (ev.lead) html += '<div class="card-lead">Lead: ' + esc(ev.lead) + '</div>';
+    if (ev.lead) html += '<div class="card-lead">Organiser: ' + esc(ev.lead) + '</div>';
     html += '<div class="card-tags">';
     html += '<span class="' + (ev.session_type === 'break' ? 'tag tag-session-break' : 'tag tag-session') + '">' + formatLabel(ev.session_type) + '</span>';
     if (ev.access_type !== 'open') html += '<span class="tag tag-access-' + ev.access_type + '">' + formatLabel(ev.access_type) + '</span>';
@@ -506,7 +506,7 @@ var PROGRAMME_DATA = {
     html += '</div>';
     if (ev.time_label) html += '<div class="detail-section"><div class="detail-label">Time</div><div class="detail-value">' + esc(ev.time_label) + '</div></div>';
     if (ev.venue) html += '<div class="detail-section"><div class="detail-label">Venue</div><div class="detail-value">' + esc(ev.venue) + '</div></div>';
-    if (ev.lead) html += '<div class="detail-section"><div class="detail-label">Lead</div><div class="detail-value">' + esc(ev.lead) + '</div></div>';
+    if (ev.lead) html += '<div class="detail-section"><div class="detail-label">Organiser</div><div class="detail-value">' + esc(ev.lead) + '</div></div>';
     if (ev.contact) html += '<div class="detail-section"><div class="detail-label">Contact</div><div class="detail-value">' + esc(ev.contact) + '</div></div>';
     if (ev.subtheme) html += '<div class="detail-section"><div class="detail-label">Sub-theme</div><div class="detail-value">' + esc(ev.subtheme) + '</div></div>';
     if (ev.notes) html += '<div class="detail-section"><div class="detail-label">Programme Details</div><div class="detail-value">' + esc(ev.notes) + '</div></div>';
@@ -537,7 +537,7 @@ var PROGRAMME_DATA = {
     html += '</div>';
     html += '<div class="edit-group"><label>Time Label</label><input type="text" id="ef-timelabel" value="' + attr(ev.time_label) + '"></div>';
     html += '<div class="edit-group"><label>Venue</label><input type="text" id="ef-venue" value="' + attr(ev.venue) + '"></div>';
-    html += '<div class="edit-group"><label>Lead</label><input type="text" id="ef-lead" value="' + attr(ev.lead) + '"></div>';
+    html += '<div class="edit-group"><label>Organiser</label><input type="text" id="ef-lead" value="' + attr(ev.lead) + '"></div>';
     html += '<div class="edit-group"><label>Contact</label><input type="text" id="ef-contact" value="' + attr(ev.contact) + '"></div>';
     html += '<div class="edit-group"><label>Sub-theme</label><input type="text" id="ef-subtheme" value="' + attr(ev.subtheme) + '"></div>';
     html += '<div class="edit-group"><label>Summary</label><textarea id="ef-summary">' + esc(ev.summary || '') + '</textarea></div>';
