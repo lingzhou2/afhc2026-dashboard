@@ -400,7 +400,7 @@ var PROGRAMME_DATA = {
   var dayLabelMap = {};
   day_groups.forEach(function(group) { dayLabelMap[group.id] = { date_label: group.date_label, title_label: group.title_label }; });
 
-  function formatLabel(s) { return s.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }); }
+  function formatLabel(s) { return s.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }).replace(/\bVip\b/g, 'VIP'); }
   function esc(s) { if (!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
   function attr(s) { return (s || '').replace(/"/g, '&quot;'); }
 
