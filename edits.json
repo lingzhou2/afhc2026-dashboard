@@ -4,5 +4,47 @@
   },
   "post-site-visit-western-sydney": {
     "title": "Site Visit 2B: Western Sydney Parklands"
+  },
+  "d2-parallel-3": {
+    "end_time": "15:30",
+    "time_label": "14:30-15:30 (60min)",
+    "agenda": [
+      {
+        "time": "14:30-15:45",
+        "speaker": "TBD",
+        "topic": "Parallel 3A",
+        "description": null
+      },
+      {
+        "time": "14:30-15:45",
+        "speaker": "TBD",
+        "topic": "Parallel 3B",
+        "description": null
+      },
+      {
+        "time": "14:30-15:45",
+        "speaker": "TBD",
+        "topic": "Parallel 3C",
+        "description": null
+      },
+      {
+        "time": "14:30-15:45",
+        "speaker": "TBD",
+        "topic": "Parallel 3D",
+        "description": null
+      },
+      {
+        "time": "14:30-15:45",
+        "speaker": "TBD",
+        "topic": "Parallel 3E",
+        "description": null
+      },
+      {
+        "time": "14:30-15:45",
+        "speaker": "TBD",
+        "topic": "Parallel 3F",
+        "description": null
+      }
+    ]
   }
 }
