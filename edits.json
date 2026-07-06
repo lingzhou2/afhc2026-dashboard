@@ -1,6 +1,10 @@
 {
   "post-site-visit-blacktown": {
-    "title": "Site Visit 2A: Blacktown"
+    "title": "Site Visit 2: Blacktown CBD & Western Sydney Parkland (Bungarribee)",
+    "start_time": "10:00",
+    "end_time": "15:30",
+    "time_label": null,
+    "lead": "Blacktown City Council & Greater Sydney Parklands"
   },
   "post-site-visit-western-sydney": {
     "title": "Site Visit 2B: Western Sydney Parklands"
