@@ -58,5 +58,8 @@
   "d2-afternoon-tea": {
     "start_time": "15:30",
     "time_label": "15:30-16:00"
+  },
+  "d2-plenary-2": {
+    "title": "Plenary 2: From Local Action to Collective Impact - The Power of Networks"
   }
 }
