@@ -723,6 +723,12 @@ var ROOM_DETAIL_DATA = {
     return room ? room.name : slot.room_id;
   }
 
+  function roomSlotVenueLabel(slot) {
+    var room = ROOM_DETAIL_DATA.rooms[slot.room_id] || {};
+    var name = room.name || slot.room_id;
+    return room.venue && room.venue !== name ? name + ' (' + room.venue + ')' : name;
+  }
+
   function createRoomCard(slot) {
     var room = ROOM_DETAIL_DATA.rooms[slot.room_id] || {};
     var card = document.createElement('div');
@@ -818,10 +824,12 @@ var ROOM_DETAIL_DATA = {
   var panel = document.getElementById('detailPanel');
   var currentBaseEv = null;
   var currentRoomSlot = null;
+  var currentDetailContext = null;
 
-  function openDetail(baseEv) {
+  function openDetail(baseEv, context) {
     currentBaseEv = baseEv;
     currentRoomSlot = null;
+    currentDetailContext = context || null;
     var ev = getEvent(baseEv);
     var detailDay = dayLabelMap[ev.day_group] || { date_label: ev.day_label, title_label: '' };
     document.querySelectorAll('.card.active').forEach(function(c) { c.classList.remove('active'); });
@@ -838,6 +846,7 @@ var ROOM_DETAIL_DATA = {
     html += '</div>';
     if (ev.time_label) html += '<div class="detail-section"><div class="detail-label">Time</div><div class="detail-value">' + esc(ev.time_label) + '</div></div>';
     if (ev.venue) html += '<div class="detail-section"><div class="detail-label">Venue</div><div class="detail-value">' + esc(ev.venue) + '</div></div>';
+    if (currentDetailContext && currentDetailContext.roomLabel) html += '<div class="detail-section"><div class="detail-label">Venue Allocation</div><div class="detail-value">' + esc(currentDetailContext.roomLabel) + '</div></div>';
     if (ev.lead) html += '<div class="detail-section"><div class="detail-label">Organiser</div><div class="detail-value">' + esc(ev.lead) + '</div></div>';
     if (ev.contact) html += '<div class="detail-section"><div class="detail-label">Contact</div><div class="detail-value">' + esc(ev.contact) + '</div></div>';
     if (ev.subtheme) html += '<div class="detail-section"><div class="detail-label">Sub-theme</div><div class="detail-value">' + esc(ev.subtheme) + '</div></div>';
@@ -862,13 +871,14 @@ var ROOM_DETAIL_DATA = {
     html += '<div class="edit-form">';
     html += '<div class="detail-day">' + esc(detailDay.date_label) + '</div>';
     if (detailDay.title_label) html += '<div class="detail-subday">' + esc(detailDay.title_label) + ' — Edit Mode</div>';
+    if (currentDetailContext && currentDetailContext.roomLabel) html += '<div class="detail-section"><div class="detail-label">Venue Allocation</div><div class="detail-value">' + esc(currentDetailContext.roomLabel) + '</div></div>';
     html += '<div class="edit-group"><label>Title</label><input type="text" id="ef-title" value="' + attr(ev.title) + '"></div>';
     html += '<div class="edit-row">';
     html += '<div class="edit-group"><label>Start Time</label><input type="text" id="ef-start" value="' + attr(ev.start_time) + '" placeholder="HH:MM"></div>';
     html += '<div class="edit-group"><label>End Time</label><input type="text" id="ef-end" value="' + attr(ev.end_time) + '" placeholder="HH:MM"></div>';
     html += '</div>';
     html += '<div class="edit-group"><label>Time Label</label><input type="text" id="ef-timelabel" value="' + attr(ev.time_label) + '"></div>';
-    html += '<div class="edit-group"><label>Venue</label><input type="text" id="ef-venue" value="' + attr(ev.venue) + '"></div>';
+    html += '<div class="edit-group"><label>Programme Venue</label><input type="text" id="ef-venue" value="' + attr(ev.venue) + '" placeholder="' + attr(currentDetailContext && currentDetailContext.roomLabel ? 'Room allocation shown above; leave blank for multi-room sessions' : '') + '"></div>';
     html += '<div class="edit-group"><label>Organiser</label><input type="text" id="ef-lead" value="' + attr(ev.lead) + '"></div>';
     html += '<div class="edit-group"><label>Contact</label><input type="text" id="ef-contact" value="' + attr(ev.contact) + '"></div>';
     html += '<div class="edit-group"><label>Sub-theme</label><input type="text" id="ef-subtheme" value="' + attr(ev.subtheme) + '"></div>';
@@ -896,7 +906,7 @@ var ROOM_DETAIL_DATA = {
     slot = resolveRoomSlot(slot);
     var linkedBaseEvents = roomSlotBaseEvents(slot);
     if (adminMode && linkedBaseEvents.length === 1) {
-      openDetail(linkedBaseEvents[0]);
+      openDetail(linkedBaseEvents[0], { roomLabel: roomSlotVenueLabel(slot), roomSlotId: slot.slot_id });
       return;
     }
     currentBaseEv = null;
@@ -940,7 +950,7 @@ var ROOM_DETAIL_DATA = {
     document.querySelectorAll('.btn-edit-linked').forEach(function(btn) {
       btn.addEventListener('click', function() {
         var baseEv = baseEventById(btn.dataset.eventId);
-        if (baseEv) openDetail(baseEv);
+        if (baseEv) openDetail(baseEv, { roomLabel: roomSlotVenueLabel(slot), roomSlotId: slot.slot_id });
       });
     });
   }
@@ -1033,7 +1043,7 @@ var ROOM_DETAIL_DATA = {
             if (!verified) {
               showToast('Saved to GitHub, but could not verify remote update yet');
               buildBoard();
-              openDetail(baseEv);
+              openDetail(baseEv, currentDetailContext);
               return;
             }
             edits = remoteData || {};
@@ -1044,7 +1054,7 @@ var ROOM_DETAIL_DATA = {
               showToast('Save may not have persisted. Please refresh and check edits.json.');
             }
             buildBoard();
-            openDetail(baseEv);
+            openDetail(baseEv, currentDetailContext);
           });
         }
       });
@@ -1057,7 +1067,7 @@ var ROOM_DETAIL_DATA = {
         saveEditsToGitHub(function(ok) {
           if (ok) {
             buildBoard();
-            openDetail(baseEv);
+            openDetail(baseEv, currentDetailContext);
             showToast('Reset: ' + baseEv.title);
           }
         });
@@ -1069,6 +1079,7 @@ var ROOM_DETAIL_DATA = {
     overlay.classList.remove('open');
     currentBaseEv = null;
     currentRoomSlot = null;
+    currentDetailContext = null;
     document.querySelectorAll('.card.active').forEach(function(c) { c.classList.remove('active'); });
   }
   backdrop.addEventListener('click', closeDetail);
@@ -1098,7 +1109,7 @@ var ROOM_DETAIL_DATA = {
     }
     adminMode = !adminMode;
     updateAdminButtons();
-    if (currentBaseEv) openDetail(currentBaseEv);
+    if (currentBaseEv) openDetail(currentBaseEv, currentDetailContext);
     else if (currentRoomSlot) openRoomDetail(currentRoomSlot);
   });
 
