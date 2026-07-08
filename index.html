@@ -366,6 +366,52 @@ var ROOM_DETAIL_DATA = {
   }
   function hasEdits(id) { return edits[id] && Object.keys(edits[id]).length > 0; }
 
+  function eventById(id) {
+    var base = baseEvents.find(function(ev) { return ev.event_id === id; });
+    return base ? getEvent(base) : null;
+  }
+
+  function roomSlotEventIds(slot) {
+    if (slot.event_ids) return slot.event_ids;
+    if (slot.event_id) return [slot.event_id];
+    if (slot.slot_id === 'r-pre-clancy') return ['pre-healthy-cities-relaunch'];
+    if (slot.slot_id === 'r-pre-hth') return ['pre-welcome-reception', 'pre-first-nations-exhibition'];
+    if (slot.slot_id === 'r-d1-opening-clancy') return ['d1-opening-plenary'];
+    if (slot.slot_id === 'r-d1-plenary-1-clancy') return ['d1-plenary-1'];
+    if (slot.slot_id === 'r-d1-awards-clancy') return ['d1-awards-ceremony'];
+    if (slot.slot_id === 'r-d1-pavilions') return ['d1-exhibition-booths'];
+    if (slot.slot_id.indexOf('r-d1-workshop-1-') === 0) return ['d1-tech-workshops-1'];
+    if (slot.slot_id.indexOf('r-d1-workshop-2-') === 0) return ['d1-tech-workshops-2'];
+    if (slot.slot_id === 'r-d2-plenary-2-clancy') return ['d2-plenary-2'];
+    if (slot.slot_id === 'r-d2-plenary-3-clancy') return ['d2-plenary-3'];
+    if (slot.slot_id === 'r-d2-pavilions') return ['d2-exhibition-booths'];
+    if (slot.slot_id.indexOf('r-d2-parallel-1-') === 0) return ['d2-parallel-1'];
+    if (slot.slot_id.indexOf('r-d2-parallel-2-') === 0) return ['d2-parallel-2'];
+    if (slot.slot_id.indexOf('r-d2-parallel-3-') === 0) return ['d2-parallel-3'];
+    if (slot.slot_id === 'r-d2-dinner') return ['d2-conference-dinner'];
+    if (slot.slot_id === 'r-d3-general-assembly-leighton') return ['d3-general-assembly'];
+    if (slot.slot_id === 'r-d3-plenary-4-leighton') return ['d3-plenary-4'];
+    if (slot.slot_id === 'r-d3-closing-leighton') return ['d3-closing-ceremony'];
+    if (slot.slot_id === 'r-d3-tyree' || slot.slot_id === 'r-d3-galleries') return ['d3-public-sessions'];
+    if (slot.slot_id === 'r-d3-pavilions') return ['d3-exhibition-booths'];
+    if (slot.slot_id.indexOf('r-d3-parallel-') === 0) return ['d3-parallel-4'];
+    return [];
+  }
+
+  function resolveRoomSlot(slot) {
+    var linkedEvents = roomSlotEventIds(slot).map(eventById).filter(Boolean);
+    if (linkedEvents.length === 0) return Object.assign({}, slot);
+    var primary = linkedEvents[0];
+    var resolved = Object.assign({}, slot);
+    resolved.linked_events = linkedEvents;
+    resolved.title = linkedEvents.length > 1 ? linkedEvents.map(function(ev) { return ev.title; }).join(' & ') : primary.title;
+    resolved.time_label = primary.time_label || slot.time_label;
+    resolved.session_type = primary.session_type || slot.session_type;
+    resolved.theme = primary.subtheme || slot.theme;
+    resolved.status = slot.status;
+    return resolved;
+  }
+
   function loadEditsFromRaw(callback) {
     fetch(RAW_URL + '?t=' + Date.now())
       .then(function(r) {
@@ -553,6 +599,7 @@ var ROOM_DETAIL_DATA = {
   function buildRoomBoard() {
     board.className = 'board venue-board';
     board.innerHTML = '<div class="venue-header-cell">Section</div>';
+    var activeRoomSlots = roomSlots.map(resolveRoomSlot);
     day_groups.forEach(function(group) {
       var head = document.createElement('div');
       head.className = 'venue-header-cell venue-day-header';
@@ -562,7 +609,7 @@ var ROOM_DETAIL_DATA = {
     });
 
     var rows = [];
-    roomSlots.forEach(function(slot) {
+    activeRoomSlots.forEach(function(slot) {
       var key = venueRowKey(slot);
       if (!rows.some(function(r) { return r.key === key; })) {
         rows.push({ key: key, label: venueRowLabel(slot), time: venueRowTime(slot), name: sectionTitle(slot), sort: venueRowSort(slot) });
@@ -582,7 +629,7 @@ var ROOM_DETAIL_DATA = {
         cell.className = 'venue-day-cell';
         cell.dataset.day = group.id;
         cell.dataset.sectionRow = row.key;
-        var slots = roomSlots.filter(function(slot) {
+        var slots = activeRoomSlots.filter(function(slot) {
           return slot.day_group === group.id && venueRowKey(slot) === row.key;
         }).sort(function(a, b) {
           var roomA = ROOM_DETAIL_DATA.rooms[a.room_id] || {};
