@@ -25,6 +25,8 @@
   .header-subtitle { font-size: 13px; color: rgba(255,255,255,.85); flex: 1; }
   .header-actions { display: flex; gap: 8px; align-items: center; }
   .btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; transition: background .15s; }
+  .btn-view { background: rgba(255,255,255,.18); color: #fff; border: 1px solid rgba(255,255,255,.35); }
+  .btn-view.active { background: #fff; color: var(--dark); }
   .btn-admin { background: var(--dark); color: #fff; }
   .btn-admin.active { background: #E65100; }
   .btn-admin:hover { opacity: .9; }
@@ -42,6 +44,7 @@
   .filter-summary { font-size: 13px; color: var(--muted); margin-left: auto; white-space: nowrap; }
 
   .board { display: flex; gap: 0; overflow-x: auto; padding: 24px 24px 32px; min-height: calc(100vh - 140px); }
+  .venue-board { display: grid; grid-template-columns: 170px repeat(5, minmax(250px, 1fr)); gap: 0; align-items: stretch; }
   .day-column { flex: 1 0 240px; min-width: 240px; max-width: 320px; display: flex; flex-direction: column; }
   .day-column + .day-column { border-left: 1px solid var(--border); padding-left: 12px; margin-left: 12px; }
   .day-header { color: var(--dark); padding: 8px 6px 12px; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
@@ -64,6 +67,8 @@
   .tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; white-space: nowrap; text-transform: capitalize; }
   .tag-session { background: #E8F5E9; color: #2E7D32; }
   .tag-session-break { background: #ECEFF1; color: #607D8B; }
+  .tag-room { background: #E0F7FA; color: #00838F; }
+  .tag-status { background: #FFF8E1; color: #F57F17; }
   .tag-access-open { background: #E8F5E9; color: #388E3C; }
   .tag-access-members_only { background: #E3EDF7; color: #37474F; }
   .tag-access-closed { background: #D5DDE5; color: #455A64; }
@@ -94,6 +99,25 @@
   .agenda-item-topic { font-size: 14px; color: var(--dark); font-weight: 600; margin: 2px 0; }
   .agenda-item-speaker { font-size: 13px; color: var(--muted); }
   .agenda-item-desc { font-size: 13px; color: var(--body-text); margin-top: 4px; }
+  .venue-header-cell,
+  .venue-section-cell,
+  .venue-day-cell { border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); padding: 12px; }
+  .venue-header-cell { position: sticky; top: 0; z-index: 2; background: #fff; color: var(--dark); font-size: 12px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; }
+  .venue-section-cell { position: sticky; left: 0; z-index: 1; background: var(--green-bg); color: var(--dark); font-size: 14px; font-weight: 700; display: flex; align-items: flex-start; }
+  .venue-section-text { display: flex; flex-direction: column; gap: 3px; }
+  .venue-section-time { color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: .2px; }
+  .venue-section-name { color: var(--dark); font-size: 14px; font-weight: 700; line-height: 1.25; }
+  .venue-day-cell { min-height: 150px; background: rgba(255,255,255,.38); display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); align-content: start; gap: 10px; }
+  .venue-day-header { display: flex; flex-direction: column; gap: 2px; }
+  .venue-day-count { margin-top: 4px; color: var(--accent); font-size: 11px; font-weight: 700; }
+  .venue-empty { color: var(--muted); font-size: 12px; font-style: italic; padding-top: 6px; }
+  .room-card { min-height: 88px; }
+  .room-card .card-title { display: flex; justify-content: space-between; gap: 10px; }
+  .room-capacity { color: var(--accent); font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .room-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .room-meta-item { background: #F8FAF6; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+  .room-meta-label { color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
+  .room-meta-value { color: var(--dark); font-size: 13px; font-weight: 600; margin-top: 2px; }
   .edit-form { display: none; }
   .admin-mode .edit-form { display: block; }
   .admin-mode .view-content { display: none; }
@@ -126,6 +150,7 @@
 
   @media (max-width: 900px) {
     .board { flex-direction: column; }
+    .venue-board { display: grid; grid-template-columns: 130px repeat(5, minmax(220px, 1fr)); }
     .day-column { max-width: 100%; }
     .day-column + .day-column { border-left: none; padding-left: 0; margin-left: 0; border-top: 1px solid var(--border); padding-top: 16px; margin-top: 12px; }
   }
@@ -139,6 +164,8 @@
   <h1>AFHC 2026 Internal Programme Dashboard</h1>
   <span class="header-subtitle">11th Global Conference of the Alliance for Healthy Cities</span>
   <div class="header-actions">
+    <button class="btn btn-view active" id="btnProgrammeView">Programme</button>
+    <button class="btn btn-view" id="btnRoomView">Venue</button>
     <button class="btn btn-export" id="btnConnectGitHub" title="Connect your GitHub token to enable shared editing">Connect GitHub</button>
     <button class="btn btn-admin" id="btnAdmin" title="Edit programme details">Admin</button>
   </div>
@@ -215,6 +242,83 @@ var PROGRAMME_DATA = {
     {event_id:"d3-closing-ceremony",source_version:"Organisers_Jun2026",day_group:"day_3",day_label:"Day 3 THU",title:"Closing Ceremony",start_time:"14:15",end_time:"14:45",time_label:"14:15-14:45 (30 min)",venue:"Leighton Hall",lead:"Jinhee Kim & Kelly Andrews",subtheme:null,session_type:"plenary",access_type:"open",summary:"End of Conference",notes:"End of Conference",source_page:1,source_text:"Thursday 14:15-14:45 Closing Ceremony\nLeighton Hall",display_order:8},
     {event_id:"d3-steering-committee",source_version:"Organisers_Jun2026",day_group:"day_3",day_label:"Day 3 THU",title:"AFHC Steering Committee Business Meeting",start_time:"15:30",end_time:"16:30",time_label:"15:30-16:30",venue:null,lead:null,subtheme:null,session_type:"business_meeting",access_type:"closed",summary:"Steering Committee business meeting, closed",notes:"Closed. Confirmed.",source_page:2,source_text:"Thursday 15:30-16:30 AFHC Steering Committee Meeting (Confirmed)",display_order:10},
     {event_id:"post-site-visit-blacktown",source_version:"Organisers_Jun2026",day_group:"post_conference",day_label:"Post-conference",title:"Site Visit 3A: Blacktown",start_time:null,end_time:null,time_label:"TBD",venue:"Blacktown",lead:"Blacktown City Council",contact:"Claudia Horna",subtheme:null,session_type:"site_visit",access_type:"off_site",summary:"Site visit to Blacktown, led by Blacktown City Council",notes:"Tentative",source_page:1,source_text:"Friday TBD\nSite Visit 3A: Blacktown\nOrganiser: Blacktown City Council, contact Claudia Horna",display_order:1}
+  ]
+};
+
+var ROOM_DETAIL_DATA = {
+  source_version: "Venue-AFHC2026.pptx + draft programme allocation",
+  rooms: {
+    "clancy": { name:"Clancy Auditorium", venue:"UNSW High Street", capacity:"945", setup:"Auditorium", source:"Venue PPT slide 4" },
+    "pavilions": { name:"Matthews Pavilions", venue:"Matthews Building", capacity:"TBC", setup:"Exhibitors' booths", source:"Venue PPT slide 5" },
+    "matthews-a": { name:"Matthews A", venue:"Matthews Building", capacity:"472", setup:"Breakout room", source:"Venue PPT slide 6" },
+    "matthews-b": { name:"Matthews B", venue:"Matthews Building", capacity:"246", setup:"Breakout room", source:"Venue PPT slide 6" },
+    "matthews-c": { name:"Matthews C", venue:"Matthews Building", capacity:"110", setup:"Breakout room", source:"Venue PPT slide 6" },
+    "matthews-d": { name:"Matthews D", venue:"Matthews Building", capacity:"110", setup:"Breakout room", source:"Venue PPT slide 6" },
+    "matthews-226": { name:"Matthews 226", venue:"Matthews Building", capacity:"38", setup:"Breakout room", source:"Venue PPT slide 7" },
+    "matthews-227": { name:"Matthews 227", venue:"Matthews Building", capacity:"42", setup:"Breakout room", source:"Venue PPT slide 7" },
+    "matthews-228": { name:"Matthews 228", venue:"Matthews Building", capacity:"42", setup:"Breakout room", source:"Venue PPT slide 7" },
+    "matthews-230": { name:"Matthews 230", venue:"Matthews Building", capacity:"48", setup:"Breakout room", source:"Venue PPT slide 7" },
+    "matthews-231": { name:"Matthews 231", venue:"Matthews Building", capacity:"48", setup:"Breakout room", source:"Venue PPT slide 7" },
+    "matthews-232": { name:"Matthews 232", venue:"Matthews Building", capacity:"38", setup:"Breakout room", source:"Venue PPT slide 7" },
+    "leighton": { name:"Leighton Hall", venue:"Scientia Building", capacity:"750", setup:"Theatre", source:"Venue PPT slide 8" },
+    "tyree": { name:"Tyree Room", venue:"Scientia Building", capacity:"250", setup:"Public session room", source:"Venue PPT slide 9" },
+    "galleries": { name:"The Galleries", venue:"Scientia Building", capacity:"200", setup:"Public session room", source:"Venue PPT slide 9" },
+    "hth": { name:"Health Translation Hub", venue:"Health Translation Hub", capacity:"TBC", setup:"Reception and exhibition", source:"Venue PPT slide 10" },
+    "mca": { name:"Museum of Contemporary Art - Foundation Hall", venue:"Circular Quay", capacity:"TBC", setup:"Conference dinner", source:"Venue PPT slide 11" }
+  },
+  slots: [
+    {slot_id:"r-pre-clancy",day_group:"pre_conference",room_id:"clancy",availability:"9:00-18:00",time_label:"PM TBC",title:"Australian Healthy Cities Event - Re-launch",session_type:"special_session",theme:"National HC networks",subsession:"National HC Networks Roundtable",status:"Tentative",notes:"Programme item exists; exact time and room booking to confirm."},
+    {slot_id:"r-pre-hth",day_group:"pre_conference",room_id:"hth",availability:"15:30-19:30",time_label:"17:00-19:00",title:"Welcome Reception & First Nations Health Exhibition",session_type:"social_event",theme:"Reception / exhibition",subsession:"Welcome reception; exhibition: First Nations place and health",status:"Confirmed",notes:"From programme and Venue PPT."},
+    {slot_id:"r-d1-opening-clancy",day_group:"day_1",room_id:"clancy",availability:"9:00-18:00",time_label:"14:00-15:15",title:"Opening Plenary & Mayors Commitment",session_type:"plenary",theme:"Opening",subsession:"Opening plenary",status:"Confirmed",notes:"From current programme."},
+    {slot_id:"r-d1-plenary-1-clancy",day_group:"day_1",room_id:"clancy",availability:"9:00-18:00",time_label:"15:45-17:00",title:"Plenary 1",session_type:"plenary",theme:"Planetary health",subsession:"Plenary 1",status:"Confirmed",notes:"From current programme."},
+    {slot_id:"r-d1-awards-clancy",day_group:"day_1",room_id:"clancy",availability:"9:00-18:00",time_label:"17:30-18:30",title:"Healthy Cities Awards Ceremony",session_type:"awards_ceremony",theme:"Awards",subsession:"AFHC / WHO awards",status:"Confirmed / tentative components",notes:"AFHC awards confirmed; WHO awards tentative in current programme."},
+    {slot_id:"r-d1-pavilions",day_group:"day_1",room_id:"pavilions",availability:"9:00-18:00",time_label:"All day",title:"Exhibition booths",session_type:"exhibition",theme:"Exhibitors",subsession:"Booths 1-10",status:"Draft",notes:"Capacity and booth layout TBC."},
+    {slot_id:"r-d1-workshop-1-226",day_group:"day_1",room_id:"matthews-226",availability:"9:00-18:00",time_label:"10:00-11:15",title:"Technical Workshop 1",session_type:"workshop",theme:"Workshop allocation",subsession:"Workshop slot TBC",status:"Allocation TBC",notes:"Smaller room option."},
+    {slot_id:"r-d1-workshop-1-227",day_group:"day_1",room_id:"matthews-227",availability:"9:00-18:00",time_label:"10:00-11:15",title:"Technical Workshop 1",session_type:"workshop",theme:"Workshop allocation",subsession:"Workshop slot TBC",status:"Allocation TBC",notes:"Smaller room option."},
+    {slot_id:"r-d1-workshop-1-228",day_group:"day_1",room_id:"matthews-228",availability:"9:00-18:00",time_label:"10:00-11:15",title:"Technical Workshop 1",session_type:"workshop",theme:"Workshop allocation",subsession:"Workshop slot TBC",status:"Allocation TBC",notes:"Smaller room option."},
+    {slot_id:"r-d1-workshop-1-230",day_group:"day_1",room_id:"matthews-230",availability:"9:00-18:00",time_label:"10:00-11:15",title:"Technical Workshop 1",session_type:"workshop",theme:"Workshop allocation",subsession:"Workshop slot TBC",status:"Allocation TBC",notes:"Numbered room option for workshop allocation."},
+    {slot_id:"r-d1-workshop-1-231",day_group:"day_1",room_id:"matthews-231",availability:"9:00-18:00",time_label:"10:00-11:15",title:"Technical Workshop 1",session_type:"workshop",theme:"Workshop allocation",subsession:"Workshop slot TBC",status:"Allocation TBC",notes:"Numbered room option for workshop allocation."},
+    {slot_id:"r-d1-workshop-1-232",day_group:"day_1",room_id:"matthews-232",availability:"9:00-18:00",time_label:"10:00-11:15",title:"Technical Workshop 1",session_type:"workshop",theme:"Workshop allocation",subsession:"Workshop slot TBC",status:"Allocation TBC",notes:"Numbered room option for workshop allocation."},
+    {slot_id:"r-d1-workshop-2-226",day_group:"day_1",room_id:"matthews-226",availability:"9:00-18:00",time_label:"11:30-12:45",title:"Technical Workshop 2",session_type:"workshop",theme:"Workshop allocation",subsession:"Workshop slot TBC",status:"Allocation TBC",notes:"Smaller room option."},
+    {slot_id:"r-d1-workshop-2-227",day_group:"day_1",room_id:"matthews-227",availability:"9:00-18:00",time_label:"11:30-12:45",title:"Technical Workshop 2",session_type:"workshop",theme:"Workshop allocation",subsession:"Workshop slot TBC",status:"Allocation TBC",notes:"Smaller room option."},
+    {slot_id:"r-d1-workshop-2-228",day_group:"day_1",room_id:"matthews-228",availability:"9:00-18:00",time_label:"11:30-12:45",title:"Technical Workshop 2",session_type:"workshop",theme:"Workshop allocation",subsession:"Workshop slot TBC",status:"Allocation TBC",notes:"Smaller room option."},
+    {slot_id:"r-d1-workshop-2-230",day_group:"day_1",room_id:"matthews-230",availability:"9:00-18:00",time_label:"11:30-12:45",title:"Technical Workshop 2",session_type:"workshop",theme:"Workshop allocation",subsession:"Workshop slot TBC",status:"Allocation TBC",notes:"Numbered room option for workshop allocation."},
+    {slot_id:"r-d1-workshop-2-231",day_group:"day_1",room_id:"matthews-231",availability:"9:00-18:00",time_label:"11:30-12:45",title:"Technical Workshop 2",session_type:"workshop",theme:"Workshop allocation",subsession:"Workshop slot TBC",status:"Allocation TBC",notes:"Numbered room option for workshop allocation."},
+    {slot_id:"r-d1-workshop-2-232",day_group:"day_1",room_id:"matthews-232",availability:"9:00-18:00",time_label:"11:30-12:45",title:"Technical Workshop 2",session_type:"workshop",theme:"Workshop allocation",subsession:"Workshop slot TBC",status:"Allocation TBC",notes:"Numbered room option for workshop allocation."},
+    {slot_id:"r-d2-plenary-2-clancy",day_group:"day_2",room_id:"clancy",availability:"9:00-18:00",time_label:"09:00-10:15",title:"Plenary 2: From Local Action to Collective Impact - The Power of Networks",session_type:"plenary",theme:"Networks",subsession:"Plenary 2",status:"Confirmed",notes:"From current programme."},
+    {slot_id:"r-d2-plenary-3-clancy",day_group:"day_2",room_id:"clancy",availability:"9:00-18:00",time_label:"16:00-17:15",title:"Plenary 3: Politicians' Roundtable - Governing for Wellbeing:  Political Leadership for Healthy Cities",session_type:"plenary",theme:"Governing for Wellbeing:  Political Leadership for Healthy Cities",subsession:"Plenary 3",status:"Confirmed / draft timing",notes:"Timing follows current dashboard edit."},
+    {slot_id:"r-d2-pavilions",day_group:"day_2",room_id:"pavilions",availability:"9:00-18:00",time_label:"All day",title:"Exhibition booths",session_type:"exhibition",theme:"Exhibitors",subsession:"Booths 1-10",status:"Draft",notes:"Capacity and booth layout TBC."},
+    {slot_id:"r-d2-parallel-1-a",day_group:"day_2",room_id:"matthews-a",availability:"9:00-18:00",time_label:"10:45-12:00",title:"Parallel 1",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 1A-1F allocation TBC",status:"Awaiting abstract cross-check",notes:"Presenter slots and abstract IDs to be added after Arinex portal cross-check."},
+    {slot_id:"r-d2-parallel-1-b",day_group:"day_2",room_id:"matthews-b",availability:"9:00-18:00",time_label:"10:45-12:00",title:"Parallel 1",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 1A-1F allocation TBC",status:"Awaiting abstract cross-check",notes:"Included for Wed 02 parallel allocation based on booking grid."},
+    {slot_id:"r-d2-parallel-1-c",day_group:"day_2",room_id:"matthews-c",availability:"9:00-18:00",time_label:"10:45-12:00",title:"Parallel 1",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 1A-1F allocation TBC",status:"Awaiting abstract cross-check",notes:"Presenter slots and abstract IDs to be added later."},
+    {slot_id:"r-d2-parallel-1-d",day_group:"day_2",room_id:"matthews-d",availability:"9:00-18:00",time_label:"10:45-12:00",title:"Parallel 1",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 1A-1F allocation TBC",status:"Awaiting abstract cross-check",notes:"Presenter slots and abstract IDs to be added later."},
+    {slot_id:"r-d2-parallel-1-230",day_group:"day_2",room_id:"matthews-230",availability:"9:00-18:00",time_label:"10:45-12:00",title:"Parallel 1",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 1A-1F allocation TBC",status:"Awaiting abstract cross-check",notes:"Added as 5th/6th parallel room because Matthews 230 is booked on Wed."},
+    {slot_id:"r-d2-parallel-1-231",day_group:"day_2",room_id:"matthews-231",availability:"9:00-18:00",time_label:"10:45-12:00",title:"Parallel 1",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 1A-1F allocation TBC",status:"Awaiting abstract cross-check",notes:"Added as 5th/6th parallel room because Matthews 231 is booked on Wed."},
+    {slot_id:"r-d2-parallel-2-a",day_group:"day_2",room_id:"matthews-a",availability:"9:00-18:00",time_label:"13:00-14:15",title:"Parallel 2",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 2A-2F allocation TBC",status:"Awaiting abstract cross-check",notes:"Presenter slots and abstract IDs to be added after Arinex portal cross-check."},
+    {slot_id:"r-d2-parallel-2-b",day_group:"day_2",room_id:"matthews-b",availability:"9:00-18:00",time_label:"13:00-14:15",title:"Parallel 2",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 2A-2F allocation TBC",status:"Awaiting abstract cross-check",notes:"Included for Wed 02 parallel allocation based on booking grid."},
+    {slot_id:"r-d2-parallel-2-c",day_group:"day_2",room_id:"matthews-c",availability:"9:00-18:00",time_label:"13:00-14:15",title:"Parallel 2",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 2A-2F allocation TBC",status:"Awaiting abstract cross-check",notes:"Presenter slots and abstract IDs to be added later."},
+    {slot_id:"r-d2-parallel-2-d",day_group:"day_2",room_id:"matthews-d",availability:"9:00-18:00",time_label:"13:00-14:15",title:"Parallel 2",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 2A-2F allocation TBC",status:"Awaiting abstract cross-check",notes:"Presenter slots and abstract IDs to be added later."},
+    {slot_id:"r-d2-parallel-2-230",day_group:"day_2",room_id:"matthews-230",availability:"9:00-18:00",time_label:"13:00-14:15",title:"Parallel 2",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 2A-2F allocation TBC",status:"Awaiting abstract cross-check",notes:"Added as 5th/6th parallel room because Matthews 230 is booked on Wed."},
+    {slot_id:"r-d2-parallel-2-231",day_group:"day_2",room_id:"matthews-231",availability:"9:00-18:00",time_label:"13:00-14:15",title:"Parallel 2",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 2A-2F allocation TBC",status:"Awaiting abstract cross-check",notes:"Added as 5th/6th parallel room because Matthews 231 is booked on Wed."},
+    {slot_id:"r-d2-parallel-3-a",day_group:"day_2",room_id:"matthews-a",availability:"9:00-18:00",time_label:"14:30-15:30",title:"Parallel 3",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 3A-3F allocation TBC",status:"Awaiting abstract cross-check",notes:"Timing follows current dashboard edit."},
+    {slot_id:"r-d2-parallel-3-b",day_group:"day_2",room_id:"matthews-b",availability:"9:00-18:00",time_label:"14:30-15:30",title:"Parallel 3",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 3A-3F allocation TBC",status:"Awaiting abstract cross-check",notes:"Included for Wed 02 parallel allocation based on booking grid."},
+    {slot_id:"r-d2-parallel-3-c",day_group:"day_2",room_id:"matthews-c",availability:"9:00-18:00",time_label:"14:30-15:30",title:"Parallel 3",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 3A-3F allocation TBC",status:"Awaiting abstract cross-check",notes:"Timing follows current dashboard edit."},
+    {slot_id:"r-d2-parallel-3-d",day_group:"day_2",room_id:"matthews-d",availability:"9:00-18:00",time_label:"14:30-15:30",title:"Parallel 3",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 3A-3F allocation TBC",status:"Awaiting abstract cross-check",notes:"Timing follows current dashboard edit."},
+    {slot_id:"r-d2-parallel-3-230",day_group:"day_2",room_id:"matthews-230",availability:"9:00-18:00",time_label:"14:30-15:30",title:"Parallel 3",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 3A-3F allocation TBC",status:"Awaiting abstract cross-check",notes:"Added as 5th/6th parallel room because Matthews 230 is booked on Wed."},
+    {slot_id:"r-d2-parallel-3-231",day_group:"day_2",room_id:"matthews-231",availability:"9:00-18:00",time_label:"14:30-15:30",title:"Parallel 3",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 3A-3F allocation TBC",status:"Awaiting abstract cross-check",notes:"Added as 5th/6th parallel room because Matthews 231 is booked on Wed."},
+    {slot_id:"r-d2-dinner",day_group:"day_2",room_id:"mca",availability:"19:00-22:00",time_label:"19:00-22:00",title:"Conference Dinner",session_type:"social_event",theme:"Conference dinner",subsession:"Foundation Hall",status:"Confirmed",notes:"Off-campus venue."},
+    {slot_id:"r-d3-general-assembly-leighton",day_group:"day_3",room_id:"leighton",availability:"9:00-18:00",time_label:"09:00-10:15",title:"AFHC General Assembly",session_type:"business_meeting",theme:"AFHC business",subsession:"General Assembly",status:"Confirmed",notes:"Members only in current programme."},
+    {slot_id:"r-d3-plenary-4-leighton",day_group:"day_3",room_id:"leighton",availability:"9:00-18:00",time_label:"13:00-14:15",title:"Plenary 4",session_type:"plenary",theme:"Urbanisation and indigenous knowledge",subsession:"Plenary 4",status:"Confirmed",notes:"Leighton Hall appears as Day 3 plenary venue in Venue PPT."},
+    {slot_id:"r-d3-closing-leighton",day_group:"day_3",room_id:"leighton",availability:"9:00-18:00",time_label:"14:15-14:45",title:"Closing Ceremony",session_type:"plenary",theme:"Closing",subsession:"Closing Ceremony",status:"Confirmed",notes:"From current programme."},
+    {slot_id:"r-d3-tyree",day_group:"day_3",room_id:"tyree",availability:"9:00-18:00",time_label:"09:00-10:15",title:"Public Sessions",session_type:"public_session",theme:"Public programme",subsession:"Session 1A",status:"Tentative",notes:"Current programme lists Tyree Room as tentative."},
+    {slot_id:"r-d3-galleries",day_group:"day_3",room_id:"galleries",availability:"9:00-18:00",time_label:"09:00-10:15",title:"Public Sessions",session_type:"public_session",theme:"Public programme",subsession:"Session 1B",status:"Tentative",notes:"Current programme lists Galleries as tentative."},
+    {slot_id:"r-d3-pavilions",day_group:"day_3",room_id:"pavilions",availability:"9:00-18:00",time_label:"All day",title:"Exhibition booths",session_type:"exhibition",theme:"Exhibitors",subsession:"Booths 1-10",status:"Draft",notes:"Capacity and booth layout TBC."},
+    {slot_id:"r-d3-parallel-c",day_group:"day_3",room_id:"matthews-c",availability:"9:00-18:00",time_label:"10:45-12:00",title:"Parallel 4",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 4A-4F allocation TBC",status:"Awaiting abstract cross-check",notes:"Thursday Parallel 4 room set: Matthews C, D, 226, 230, 231, 232."},
+    {slot_id:"r-d3-parallel-d",day_group:"day_3",room_id:"matthews-d",availability:"9:00-18:00",time_label:"10:45-12:00",title:"Parallel 4",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 4A-4F allocation TBC",status:"Awaiting abstract cross-check",notes:"Thursday Parallel 4 room set: Matthews C, D, 226, 230, 231, 232."},
+    {slot_id:"r-d3-parallel-226",day_group:"day_3",room_id:"matthews-226",availability:"9:00-18:00",time_label:"10:45-12:00",title:"Parallel 4",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 4A-4F allocation TBC",status:"Awaiting abstract cross-check",notes:"Thursday Parallel 4 room set: Matthews C, D, 226, 230, 231, 232."},
+    {slot_id:"r-d3-parallel-230",day_group:"day_3",room_id:"matthews-230",availability:"9:00-18:00",time_label:"10:45-12:00",title:"Parallel 4",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 4A-4F allocation TBC",status:"Awaiting abstract cross-check",notes:"Thursday Parallel 4 room set: Matthews C, D, 226, 230, 231, 232."},
+    {slot_id:"r-d3-parallel-231",day_group:"day_3",room_id:"matthews-231",availability:"9:00-18:00",time_label:"10:45-12:00",title:"Parallel 4",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 4A-4F allocation TBC",status:"Awaiting abstract cross-check",notes:"Thursday Parallel 4 room set: Matthews C, D, 226, 230, 231, 232."},
+    {slot_id:"r-d3-parallel-232",day_group:"day_3",room_id:"matthews-232",availability:"9:00-18:00",time_label:"10:45-12:00",title:"Parallel 4",session_type:"parallel",theme:"Abstract sessions",subsession:"Parallel 4A-4F allocation TBC",status:"Awaiting abstract cross-check",notes:"Thursday Parallel 4 room set: Matthews C, D, 226, 230, 231, 232."}
   ]
 };
 
@@ -394,6 +498,8 @@ var PROGRAMME_DATA = {
 
   var day_groups = PROGRAMME_DATA.day_groups;
   var baseEvents = PROGRAMME_DATA.events;
+  var roomSlots = ROOM_DETAIL_DATA.slots;
+  var currentView = 'programme';
   var dayLabelMap = {};
   day_groups.forEach(function(group) { dayLabelMap[group.id] = { date_label: group.date_label, title_label: group.title_label }; });
 
@@ -406,10 +512,19 @@ var PROGRAMME_DATA = {
   var typeSelect = document.getElementById('filterType');
   var venueSelect = document.getElementById('filterVenue');
   var accessSelect = document.getElementById('filterAccess');
+  var programmeViewBtn = document.getElementById('btnProgrammeView');
+  var roomViewBtn = document.getElementById('btnRoomView');
   day_groups.forEach(function(g) { var o = document.createElement('option'); o.value = g.id; o.textContent = g.date_label + ' — ' + g.title_label; daySelect.appendChild(o); });
   var sessionTypes = []; baseEvents.forEach(function(e) { if (sessionTypes.indexOf(e.session_type) === -1) sessionTypes.push(e.session_type); }); sessionTypes.sort();
+  roomSlots.forEach(function(s) { if (sessionTypes.indexOf(s.session_type) === -1) sessionTypes.push(s.session_type); }); sessionTypes.sort();
   sessionTypes.forEach(function(t) { var o = document.createElement('option'); o.value = t; o.textContent = formatLabel(t); typeSelect.appendChild(o); });
   var venues = []; baseEvents.forEach(function(e) { if (e.venue && venues.indexOf(e.venue) === -1) venues.push(e.venue); }); venues.sort();
+  roomSlots.forEach(function(slot) {
+    var room = ROOM_DETAIL_DATA.rooms[slot.room_id];
+    if (room && venues.indexOf(room.name) === -1) venues.push(room.name);
+    if (room && room.venue && venues.indexOf(room.venue) === -1) venues.push(room.venue);
+  });
+  venues.sort();
   venues.forEach(function(v) { var o = document.createElement('option'); o.value = v; o.textContent = v; venueSelect.appendChild(o); });
   var accessTypes = []; baseEvents.forEach(function(e) { if (accessTypes.indexOf(e.access_type) === -1) accessTypes.push(e.access_type); }); accessTypes.sort();
   accessTypes.forEach(function(a) { var o = document.createElement('option'); o.value = a; o.textContent = formatLabel(a); accessSelect.appendChild(o); });
@@ -417,6 +532,11 @@ var PROGRAMME_DATA = {
   var board = document.getElementById('board');
   function buildBoard() {
     board.innerHTML = '';
+    if (currentView === 'room') {
+      buildRoomBoard();
+      return;
+    }
+    board.className = 'board';
     day_groups.forEach(function(group) {
       var col = document.createElement('div');
       col.className = 'day-column';
@@ -428,6 +548,144 @@ var PROGRAMME_DATA = {
       board.appendChild(col);
     });
     applyFilters();
+  }
+
+  function buildRoomBoard() {
+    board.className = 'board venue-board';
+    board.innerHTML = '<div class="venue-header-cell">Section</div>';
+    day_groups.forEach(function(group) {
+      var head = document.createElement('div');
+      head.className = 'venue-header-cell venue-day-header';
+      head.dataset.day = group.id;
+      head.innerHTML = '<span>' + esc(group.date_label) + '</span><span>' + esc(group.title_label) + '</span><span class="venue-day-count">0</span>';
+      board.appendChild(head);
+    });
+
+    var rows = [];
+    roomSlots.forEach(function(slot) {
+      var key = venueRowKey(slot);
+      if (!rows.some(function(r) { return r.key === key; })) {
+        rows.push({ key: key, label: venueRowLabel(slot), time: venueRowTime(slot), name: sectionTitle(slot), sort: venueRowSort(slot) });
+      }
+    });
+    rows.sort(function(a, b) { return a.sort - b.sort || a.label.localeCompare(b.label); });
+
+    rows.forEach(function(row) {
+      var label = document.createElement('div');
+      label.className = 'venue-section-cell';
+      label.dataset.sectionRow = row.key;
+      label.innerHTML = '<div class="venue-section-text"><span class="venue-section-time">' + esc(row.time) + '</span><span class="venue-section-name">' + esc(row.name) + '</span></div>';
+      board.appendChild(label);
+
+      day_groups.forEach(function(group) {
+        var cell = document.createElement('div');
+        cell.className = 'venue-day-cell';
+        cell.dataset.day = group.id;
+        cell.dataset.sectionRow = row.key;
+        var slots = roomSlots.filter(function(slot) {
+          return slot.day_group === group.id && venueRowKey(slot) === row.key;
+        }).sort(function(a, b) {
+          var roomA = ROOM_DETAIL_DATA.rooms[a.room_id] || {};
+          var roomB = ROOM_DETAIL_DATA.rooms[b.room_id] || {};
+          return (roomA.venue || '').localeCompare(roomB.venue || '') ||
+            (roomA.name || '').localeCompare(roomB.name || '');
+        });
+        slots.forEach(function(slot) { cell.appendChild(createRoomCard(slot)); });
+        if (slots.length === 0) {
+          var empty = document.createElement('div');
+          empty.className = 'venue-empty';
+          empty.textContent = '';
+          cell.appendChild(empty);
+        }
+        board.appendChild(cell);
+      });
+    });
+    applyFilters();
+  }
+
+  function venueRowKey(slot) {
+    return [slot.session_type || 'section_tbc', slot.time_label || slot.availability || 'time_tbc', sectionTitle(slot)].join('|');
+  }
+
+  function sectionTitle(slot) {
+    if (slot.session_type === 'parallel') return 'Parallel sessions';
+    if (slot.session_type === 'workshop') return 'Technical workshops';
+    if (slot.session_type === 'exhibition') return 'Exhibition';
+    if (slot.session_type === 'plenary') return 'Plenary';
+    if (slot.session_type === 'awards_ceremony') return 'Awards ceremony';
+    if (slot.session_type === 'business_meeting') return 'Business meeting';
+    if (slot.session_type === 'social_event') return 'Social events';
+    if (slot.session_type === 'public_session') return 'Public sessions';
+    if (slot.session_type === 'special_session') return 'Special sessions';
+    return slot.title || formatLabel(slot.session_type || 'section_tbc');
+  }
+
+  function slotSectionTag(slot) {
+    if (!slot.title) return formatLabel(slot.session_type || 'section_tbc');
+    if (slot.session_type === 'parallel') {
+      var parallel = slot.title.match(/Parallel\s+\d+/i);
+      return parallel ? parallel[0] : 'Parallel';
+    }
+    if (slot.session_type === 'workshop') {
+      var workshop = slot.title.match(/Technical Workshops?\s+\d+/i);
+      return workshop ? workshop[0] : 'Workshop';
+    }
+    if (slot.session_type === 'plenary') {
+      if (slot.title && slot.title.indexOf('Opening Plenary') !== -1) return 'Opening Plenary';
+      if (slot.title && slot.title.indexOf('Closing Ceremony') !== -1) return 'Closing Ceremony';
+      var plenary = slot.subsession && slot.subsession.match(/Plenary\s+[\d/]+/i);
+      return plenary ? plenary[0] : ((slot.title.match(/Plenary\s+\d+/i) || ['Plenary'])[0]);
+    }
+    if (slot.session_type === 'awards_ceremony') return 'Awards Ceremony';
+    if (slot.session_type === 'business_meeting') return 'General Assembly';
+    if (slot.session_type === 'public_session') return 'Public Sessions';
+    if (slot.session_type === 'special_session') return 'Special Session';
+    if (slot.session_type === 'social_event') return slot.title.indexOf('Dinner') !== -1 ? 'Dinner' : 'Social Event';
+    if (slot.session_type === 'exhibition') return 'Exhibition';
+    return slot.title;
+  }
+
+  function venueRowLabel(slot) {
+    return venueRowTime(slot) + ' ' + sectionTitle(slot);
+  }
+
+  function venueRowTime(slot) {
+    return slot.time_label || slot.availability || 'Time TBC';
+  }
+
+  function venueRowSort(slot) {
+    if (slot.session_type === 'exhibition') return 99999;
+    var t = slot.time_label || slot.availability || '';
+    var m = t.match(/(\d{1,2}):(\d{2})/);
+    var minutes = m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : (t === 'All day' ? 0 : 9999);
+    var rank = { workshop: 1, plenary: 2, public_session: 3, parallel: 4, business_meeting: 5, awards_ceremony: 6, special_session: 7, social_event: 8 };
+    return minutes * 10 + (rank[slot.session_type] || 8);
+  }
+
+  function roomName(slot) {
+    var room = ROOM_DETAIL_DATA.rooms[slot.room_id];
+    return room ? room.name : slot.room_id;
+  }
+
+  function createRoomCard(slot) {
+    var room = ROOM_DETAIL_DATA.rooms[slot.room_id] || {};
+    var card = document.createElement('div');
+    card.className = 'card room-card';
+    card.dataset.roomSlotId = slot.slot_id;
+    card.dataset.sessionType = slot.session_type;
+    card.dataset.accessType = '';
+    card.dataset.venue = room.name || '';
+    card.dataset.venueGroup = room.venue || '';
+    card.dataset.dayGroup = slot.day_group;
+    card.dataset.search = [slot.title, slot.theme, slot.subsession, slot.status, room.name, room.venue, room.capacity].filter(Boolean).join(' ').toLowerCase();
+    var html = '<div class="card-title"><span>' + esc(room.name || slot.room_id) + '</span><span class="room-capacity">' + esc(room.capacity || 'TBC') + '</span></div>';
+    html += '<div class="card-tags">';
+    html += '<span class="tag tag-session">' + esc(slotSectionTag(slot)) + '</span>';
+    if (slot.status) html += '<span class="tag tag-status">' + esc(slot.status) + '</span>';
+    html += '</div>';
+    card.innerHTML = html;
+    card.addEventListener('click', function() { openRoomDetail(slot); });
+    return card;
   }
 
   function createCard(baseEv) {
@@ -465,7 +723,7 @@ var PROGRAMME_DATA = {
       var show = true;
       if (fDay && card.dataset.dayGroup !== fDay) show = false;
       if (fType && card.dataset.sessionType !== fType) show = false;
-      if (fVenue && card.dataset.venue !== fVenue) show = false;
+      if (fVenue && card.dataset.venue !== fVenue && card.dataset.venueGroup !== fVenue) show = false;
       if (fAccess && card.dataset.accessType !== fAccess) show = false;
       if (q && !card.dataset.search.includes(q)) show = false;
       card.classList.toggle('card-hidden', !show);
@@ -474,10 +732,29 @@ var PROGRAMME_DATA = {
     document.querySelectorAll('.day-column').forEach(function(col) {
       col.querySelector('.day-count').textContent = col.querySelectorAll('.card:not(.card-hidden)').length;
     });
-    filterSummary.textContent = visible + ' of ' + baseEvents.length + ' activities';
+    document.querySelectorAll('.venue-day-header').forEach(function(head) {
+      var day = head.dataset.day;
+      var count = 0;
+      document.querySelectorAll('.venue-day-cell[data-day="' + day + '"] .card:not(.card-hidden)').forEach(function() { count++; });
+      var countEl = head.querySelector('.venue-day-count');
+      if (countEl) countEl.textContent = count + ' slots';
+    });
+    filterSummary.textContent = visible + ' of ' + (currentView === 'room' ? roomSlots.length + ' venue slots' : baseEvents.length + ' activities');
   }
   searchBox.addEventListener('input', applyFilters);
   [daySelect, typeSelect, venueSelect, accessSelect].forEach(function(el) { el.addEventListener('change', applyFilters); });
+
+  function setView(view) {
+    currentView = view;
+    programmeViewBtn.classList.toggle('active', view === 'programme');
+    roomViewBtn.classList.toggle('active', view === 'room');
+    accessSelect.disabled = view === 'room';
+    if (view === 'room') accessSelect.value = '';
+    closeDetail();
+    buildBoard();
+  }
+  programmeViewBtn.addEventListener('click', function() { setView('programme'); });
+  roomViewBtn.addEventListener('click', function() { setView('room'); });
 
   // Detail Panel
   var overlay = document.getElementById('detailOverlay');
@@ -555,6 +832,39 @@ var PROGRAMME_DATA = {
     overlay.classList.add('open');
     document.getElementById('detailClose').addEventListener('click', closeDetail);
     if (adminMode) bindEditHandlers(baseEv);
+  }
+
+  function openRoomDetail(slot) {
+    currentBaseEv = null;
+    var room = ROOM_DETAIL_DATA.rooms[slot.room_id] || {};
+    var detailDay = dayLabelMap[slot.day_group] || { date_label: slot.day_group, title_label: '' };
+    document.querySelectorAll('.card.active').forEach(function(c) { c.classList.remove('active'); });
+    var ac = document.querySelector('.card[data-room-slot-id="' + slot.slot_id + '"]');
+    if (ac) ac.classList.add('active');
+    var html = '<button class="detail-close" id="detailClose">&times;</button>';
+    html += '<div class="view-content">';
+    html += '<div class="detail-day">' + esc(detailDay.date_label) + '</div>';
+    html += '<div class="detail-subday">Venue</div>';
+    html += '<div class="detail-title">' + esc(room.name || slot.room_id) + '</div>';
+    html += '<div class="detail-tags">';
+    html += '<span class="tag tag-session">' + esc(slotSectionTag(slot)) + '</span>';
+    if (slot.status) html += '<span class="tag tag-status">' + esc(slot.status) + '</span>';
+    html += '</div>';
+    html += '<div class="room-meta-grid">';
+    html += '<div class="room-meta-item"><div class="room-meta-label">Available</div><div class="room-meta-value">' + esc(slot.availability || 'TBC') + '</div></div>';
+    html += '<div class="room-meta-item"><div class="room-meta-label">Assigned Time</div><div class="room-meta-value">' + esc(slot.time_label || 'TBC') + '</div></div>';
+    html += '<div class="room-meta-item"><div class="room-meta-label">Capacity</div><div class="room-meta-value">' + esc(room.capacity || 'TBC') + '</div></div>';
+    html += '</div>';
+    html += '<hr class="detail-divider">';
+    html += '<div class="detail-section"><div class="detail-label">Assigned Workshop / Session</div><div class="detail-value">' + esc(slot.title) + '</div></div>';
+    if (slot.theme) html += '<div class="detail-section"><div class="detail-label">Theme / Use</div><div class="detail-value">' + esc(slot.theme) + '</div></div>';
+    if (slot.subsession) html += '<div class="detail-section"><div class="detail-label">Sub-session Details</div><div class="detail-value">' + esc(slot.subsession) + '</div></div>';
+    html += '<div class="detail-section"><div class="detail-label">Presenter / Abstract Slots</div><div class="detail-value">TBC after Arinex portal cross-check. This field can hold presenter names, abstract IDs, session chair/moderator and slot notes.</div></div>';
+    html += '</div>';
+    panel.innerHTML = html;
+    panel.className = 'detail-panel';
+    overlay.classList.add('open');
+    document.getElementById('detailClose').addEventListener('click', closeDetail);
   }
 
   function agendaEntryHTML(a, idx) {
