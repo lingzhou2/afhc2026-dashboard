@@ -138,6 +138,7 @@
   .btn-save { background: var(--accent); color: #fff; padding: 10px 24px; font-size: 14px; width: 100%; margin-top: 10px; border-radius: 8px; }
   .btn-save:hover { background: #009DB0; }
   .btn-save:disabled { background: #ccc; cursor: not-allowed; }
+  .btn-edit-linked { margin-top: 8px; text-align: left; line-height: 1.35; }
   .btn-add-agenda { background: #E8F5E9; color: #2E7D32; padding: 8px 16px; font-size: 12px; border-radius: 6px; border: 1px dashed #A5D6A7; width: 100%; }
   .btn-add-agenda:hover { background: #C8E6C9; }
   .btn-reset { background: #FFF3E0; color: #E65100; padding: 8px 16px; font-size: 12px; border-radius: 6px; border: 1px solid #FFCC80; width: 100%; margin-top: 6px; }
@@ -371,6 +372,10 @@ var ROOM_DETAIL_DATA = {
     return base ? getEvent(base) : null;
   }
 
+  function baseEventById(id) {
+    return baseEvents.find(function(ev) { return ev.event_id === id; }) || null;
+  }
+
   function roomSlotEventIds(slot) {
     if (slot.event_ids) return slot.event_ids;
     if (slot.event_id) return [slot.event_id];
@@ -410,6 +415,10 @@ var ROOM_DETAIL_DATA = {
     resolved.theme = primary.subtheme || slot.theme;
     resolved.status = slot.status;
     return resolved;
+  }
+
+  function roomSlotBaseEvents(slot) {
+    return roomSlotEventIds(slot).map(baseEventById).filter(Boolean);
   }
 
   function loadEditsFromRaw(callback) {
@@ -808,9 +817,11 @@ var ROOM_DETAIL_DATA = {
   var backdrop = document.getElementById('detailBackdrop');
   var panel = document.getElementById('detailPanel');
   var currentBaseEv = null;
+  var currentRoomSlot = null;
 
   function openDetail(baseEv) {
     currentBaseEv = baseEv;
+    currentRoomSlot = null;
     var ev = getEvent(baseEv);
     var detailDay = dayLabelMap[ev.day_group] || { date_label: ev.day_label, title_label: '' };
     document.querySelectorAll('.card.active').forEach(function(c) { c.classList.remove('active'); });
@@ -882,7 +893,14 @@ var ROOM_DETAIL_DATA = {
   }
 
   function openRoomDetail(slot) {
+    slot = resolveRoomSlot(slot);
+    var linkedBaseEvents = roomSlotBaseEvents(slot);
+    if (adminMode && linkedBaseEvents.length === 1) {
+      openDetail(linkedBaseEvents[0]);
+      return;
+    }
     currentBaseEv = null;
+    currentRoomSlot = slot;
     var room = ROOM_DETAIL_DATA.rooms[slot.room_id] || {};
     var detailDay = dayLabelMap[slot.day_group] || { date_label: slot.day_group, title_label: '' };
     document.querySelectorAll('.card.active').forEach(function(c) { c.classList.remove('active'); });
@@ -907,11 +925,24 @@ var ROOM_DETAIL_DATA = {
     if (slot.theme) html += '<div class="detail-section"><div class="detail-label">Theme / Use</div><div class="detail-value">' + esc(slot.theme) + '</div></div>';
     if (slot.subsession) html += '<div class="detail-section"><div class="detail-label">Sub-session Details</div><div class="detail-value">' + esc(slot.subsession) + '</div></div>';
     html += '<div class="detail-section"><div class="detail-label">Presenter / Abstract Slots</div><div class="detail-value">TBC after Arinex portal cross-check. This field can hold presenter names, abstract IDs, session chair/moderator and slot notes.</div></div>';
+    if (adminMode && linkedBaseEvents.length > 1) {
+      html += '<hr class="detail-divider">';
+      html += '<div class="detail-label">Edit Linked Programme Items</div>';
+      linkedBaseEvents.forEach(function(baseEv) {
+        html += '<button class="btn btn-save btn-edit-linked" data-event-id="' + attr(baseEv.event_id) + '">' + esc(getEvent(baseEv).title || baseEv.title) + '</button>';
+      });
+    }
     html += '</div>';
     panel.innerHTML = html;
     panel.className = 'detail-panel';
     overlay.classList.add('open');
     document.getElementById('detailClose').addEventListener('click', closeDetail);
+    document.querySelectorAll('.btn-edit-linked').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var baseEv = baseEventById(btn.dataset.eventId);
+        if (baseEv) openDetail(baseEv);
+      });
+    });
   }
 
   function agendaEntryHTML(a, idx) {
@@ -1037,6 +1068,7 @@ var ROOM_DETAIL_DATA = {
   function closeDetail() {
     overlay.classList.remove('open');
     currentBaseEv = null;
+    currentRoomSlot = null;
     document.querySelectorAll('.card.active').forEach(function(c) { c.classList.remove('active'); });
   }
   backdrop.addEventListener('click', closeDetail);
@@ -1067,6 +1099,7 @@ var ROOM_DETAIL_DATA = {
     adminMode = !adminMode;
     updateAdminButtons();
     if (currentBaseEv) openDetail(currentBaseEv);
+    else if (currentRoomSlot) openRoomDetail(currentRoomSlot);
   });
 
   updateAdminButtons();
