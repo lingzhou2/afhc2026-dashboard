@@ -70,5 +70,12 @@
   },
   "d1-plenary-1": {
     "title": "Plenary 1: Leaders Forum on Healthy Cities featuring Planetary Health"
+  },
+  "pre-site-visit-centennial": {
+    "start_time": "09:00",
+    "end_time": "12:00",
+    "time_label": "09:00-12:00",
+    "venue": "WILD PLAY Discovery Centre in Centennial Park",
+    "summary": "WILD PLAY Discovery Centre in Centennial Park (Google map: https://maps.app.goo.gl/9DJDkyqAzABxxpU67)  \nCapacity: 80 pax"
   }
 }
